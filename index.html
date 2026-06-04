@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Power - PMO进度管理</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
+        .app { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 40px; border-radius: 16px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(102,126,234,0.3); }
+        .header h1 { font-size: 24px; font-weight: 600; letter-spacing: 1px; }
+        .header h1 span { font-weight: 300; opacity: 0.9; }
+        .header-actions { display: flex; gap: 12px; }
+        .btn { padding: 10px 24px; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s ease; }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,255,255,0.3); }
+        .btn-success { background: #52c41a; color: white; }
+        .btn-success:hover { background: #45a817; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(82,196,26,0.3); }
+        .btn-danger { background: #ff4d4f; color: white; }
+        .btn-danger:hover { background: #d9363e; transform: translateY(-2px); }
+        .btn-back { background: rgba(255,255,255,0.2); color: white; }
+        .btn-back:hover { background: rgba(255,255,255,0.3); }
+        .btn-sm { padding: 6px 16px; font-size: 12px; border-radius: 8px; }
+        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .stat-card .num { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card .label { font-size: 14px; color: #999; margin-top: 4px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+        .card.求职::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+        .card.找对象::before { background: linear-gradient(90deg, #f093fb, #f5576c); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .card-name { font-size: 20px; font-weight: 600; }
+        .tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .tag.求职 { background: #eef0ff; color: #667eea; }
+        .tag.找对象 { background: #fdeef1; color: #f5576c; }
+        .card-body { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card-item { text-align: center; padding: 12px; background: #f8f9fc; border-radius: 10px; }
+        .card-item .value { font-size: 24px; font-weight: 700; color: #333; }
+        .card-item .label { font-size: 12px; color: #999; margin-top: 2px; }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+        .status-badge.未开始 { background: #f5f5f5; color: #bbb; }
+        .status-badge.进行中 { background: #e6f7ff; color: #1890ff; }
+        .status-badge.已完成 { background: #f6ffed; color: #52c41a; }
+        .card-footer { margin-top: 16px; display: flex; justify-content: center; }
+        .progress-bar { width: 100%; height: 6px; background: #f0f0f0; border-radius: 3px; margin-top: 12px; overflow: hidden; }
+        .progress-bar .fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.5s ease; }
+        .detail-page { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .person-header { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
+        .person-header h2 { font-size: 28px; margin-bottom: 8px; }
+        .person-header .meta { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+        .person-header .meta .item { display: flex; align-items: center; gap: 8px; }
+        .person-header .meta .item .num { font-size: 20px; font-weight: 700; color: #667eea; }
+        .stages { display: flex; flex-direction: column; gap: 16px; }
+        .stage-card { background: white; border-radius: 14px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s ease; border-left: 4px solid #e8e8e8; }
+        .stage-card.active { border-left-color: #1890ff; }
+        .stage-card.completed { border-left-color: #52c41a; }
+        .stage-card.locked { opacity: 0.5; pointer-events: none; }
+        .stage-card.locked::after { content: '🔒 上一阶段未完成'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 8px; font-size: 14px; }
+        .stage-card.locked { position: relative; overflow: hidden; }
+        .stage-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .stage-name { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .stage-index { width: 28px; height: 28px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+        .stage-index.completed { background: #52c41a; }
+        .stage-index.active { background: #1890ff; }
+        .stage-controls { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        .stage-controls input[type="number"] { width: 100px; padding: 8px 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; outline: none; transition: border 0.3s; }
+        .stage-controls input[type="number"]:focus { border-color: #667eea; }
+        .stage-controls select { padding: 8px 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; outline: none; background: white; cursor: pointer; }
+        .stage-controls select:focus { border-color: #667eea; }
+        .stage-threshold { font-size: 12px; color: #999; margin-left: 4px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s ease; }
+        .modal { background: white; border-radius: 20px; padding: 32px; width: 90%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal h3 { font-size: 22px; margin-bottom: 20px; }
+        .modal .form-group { margin-bottom: 16px; }
+        .modal .form-group label { display: block; font-size: 14px; font-weight: 500; color: #666; margin-bottom: 6px; }
+        .modal .form-group input, .modal .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e8e8e8; border-radius: 10px; font-size: 14px; outline: none; }
+        .modal .form-group input:focus, .modal .form-group select:focus { border-color: #667eea; }
+        .modal .modal-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; }
+        .modal .btn-cancel { padding: 10px 24px; border: 2px solid #e8e8e8; border-radius: 10px; background: white; cursor: pointer; font-size: 14px; }
+        .modal .btn-cancel:hover { background: #f5f5f5; }
+        .config-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 12px; text-decoration: underline; padding: 2px 6px; }
+        .config-btn:hover { color: #667eea; }
+        .threshold-config { display: flex; align-items: center; gap: 8px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .date-input { padding: 6px 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 13px; outline: none; }
+        .date-input:focus { border-color: #667eea; }
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 12px; text-align: center; padding: 20px; }
+            .grid { grid-template-columns: 1fr; }
+            .stage-controls { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+// ==================== DATA CONFIG ====================
+const PERSONAL_CONFIG_KEY = 'project_power_data';
+const THRESHOLD_CONFIG_KEY = 'project_power_thresholds';
+
+// Default thresholds for job-seeking stages
+const DEFAULT_THRESHOLDS = {
+// 求职赛道 thresholds (index -> threshold)
+job: {
+    0: { threshold: 1, label: '完成即进入' },
+    1: { threshold: 1, label: '≥1人即进行中' },
+    2: { threshold: 10, label: '≥10次即已完成' },
+    3: { threshold: 20, label: '≥20家即已完成' },
+    4: { threshold: 1, label: '≥1次即进行中' },
+    5: { threshold: 1, label: '≥1次即进行中' },
+},
+// 找对象赛道 thresholds (index -> threshold)
+love: {
+    0: { threshold: 1, label: '完成即进入' },
+    1: { threshold: 3, label: '≥3种渠道即进行中' },
+    2: { threshold: 5, label: '≥5人即进行中' },
+    3: { threshold: 10, label: '≥10次即进行中' },
+    4: { threshold: 3, label: '≥3次即进行中' },
+    5: { threshold: 1, label: '完成即进入' },
+    6: { threshold: 1, label: '完成即进入' },
+}
+};
+
+// Job-seeking stages (6 stages as per PRD - actually 6 numbered, with stage 0 being resume writing with no number input)
+const JOB_STAGES = [
+    { name: '撰写中英文简历', hasNumber: false, key: 'resume' },
+    { name: '添加猎头联系方式', hasNumber: true, key: 'hunter', defaultThreshold: 5 },
+    { name: '与猎头/友人沟通工作机会', hasNumber: true, key: 'communicate', defaultThreshold: 10 },
+    { name: '向公司投出简历', hasNumber: true, key: 'apply', defaultThreshold: 20 },
+    { name: '公司一轮面试', hasNumber: true, key: 'interview1', defaultThreshold: 1 },
+    { name: '公司二轮及终面面试', hasNumber: true, key: 'interview2', defaultThreshold: 1 },
+];
+
+// Love-seeking stages (7 stages)
+const LOVE_STAGES = [
+    { name: '个人形象优化', hasNumber: false, key: 'appearance' },
+    { name: '拓展社交渠道', hasNumber: true, key: 'social', defaultThreshold: 3 },
+    { name: '新增异性联系人', hasNumber: true, key: 'contacts', defaultThreshold: 5 },
+    { name: '日常沟通互动', hasNumber: true, key: 'chat', defaultThreshold: 10 },
+    { name: '线下见面约会', hasNumber: true, key: 'date', defaultThreshold: 3 },
+    { name: '深度相处磨合', hasNumber: false, key: 'deepen' },
+    { name: '确定恋爱关系', hasNumber: false, key: 'commit' },
+];
+
+const DEFAULT_DATA = {
+    persons: [
+        { id: 'xlh', name: '向龙一', track: '求职', startDate: new Date().toISOString().split('T')[0] },
+        { id: 'ztr', name: '赵陶然', track: '求职', startDate: new Date().toISOString().split('T')[0] },
+        { id: 'hq', name: '黄群', track: '找对象', startDate: new Date().toISOString().split('T')[0] },
+    ],
+    progresses: {}
+};
+
+// ==================== STATE ====================
+let state = { data: null, currentPage: 'home', currentPersonId: null };
+
+function loadData() {
+    const raw = localStorage.getItem(PERSONAL_CONFIG_KEY);
+    if (raw) {
+        try {
+            state.data = JSON.parse(raw);
+            return;
+        } catch(e) {}
+    }
+    state.data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    saveData();
+}
+
+function saveData() {
+    localStorage.setItem(PERSONAL_CONFIG_KEY, JSON.stringify(state.data));
+}
+
+function loadThresholds() {
+    const raw = localStorage.getItem(THRESHOLD_CONFIG_KEY);
+    if (raw) {
+        try { return JSON.parse(raw); } catch(e) {}
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
+}
+
+function saveThresholds(thresholds) {
+    localStorage.setItem(THRESHOLD_CONFIG_KEY, JSON.stringify(thresholds));
+}
+
+function getStagesForTrack(track) {
+    return track === '求职' ? JOB_STAGES : LOVE_STAGES;
+}
+
+function getStageStatus(personId, stageIndex, stages, thresholds) {
+    const p = state.data.progresses[personId];
+    if (!p || !p.stages) return '未开始';
+    const s = p.stages[stageIndex];
+    if (!s) return '未开始';
+    
+    // If manually set, respect it
+    if (s.manualStatus) return s.manualStatus;
+    
+    const stage = stages[stageIndex];
+    // For non-number stages, just return saved status or default (no auto calc)
+    if (!stage.hasNumber) {
+        return s.status || '未开始';
+    }
+    
+    const val = s.value || 0;
+    if (val === 0) return '未开始';
+    
+    const person = state.data.persons.find(pr => pr.id === personId);
+    const trackKey = person?.track === '求职' ? 'job' : 'love';
+    const th = thresholds[trackKey] && thresholds[trackKey][stageIndex];
+    const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
+    
+    // Rule: if threshold >= 10, reaching it means 已完成
+    if (thresholdVal >= 10) {
+        return val >= thresholdVal ? '已完成' : '进行中';
+    }
+    // Rule: if threshold >= 5 but < 10, reaching it means 已完成  
+    if (thresholdVal >= 5) {
+        return val >= thresholdVal ? '已完成' : '进行中';
+    }
+    // Rule: if threshold is 3, reaching it means 进行中 (not completed yet)
+    if (thresholdVal === 3) {
+        return val >= thresholdVal ? '进行中' : (val > 0 ? '进行中' : '未开始');
+    }
+    // Rule: if threshold is 1, having any number means 进行中
+    if (thresholdVal === 1) {
+        return '进行中';
+    }
+    
+    return val > 0 ? '进行中' : '未开始';
+}
+
+function calculateProgress(personId) {
+    const person = state.data.persons.find(p => p.id === personId);
+    if (!person) return { percent: 0, completed: 0, total: 0, status: '未开始' };
+    const stages = getStagesForTrack(person.track);
+    const thresholds = loadThresholds();
+    let completed = 0;
+    let started = false;
+    stages.forEach((_, idx) => {
+        const st = getStageStatus(personId, idx, stages, thresholds);
+        if (st === '已完成') completed++;
+        if (st !== '未开始') started = true;
+    });
+    const total = stages.length;
+    const percent = total > 0 ? Math.round((completed / total) * 1000) / 10 : 0;
+    const percentDisplay = percent.toFixed(1);
+    let status = '未开始';
+    if (completed === total) status = '已完成';
+    else if (started) status = '进行中';
+    return { percent, percentDisplay, completed, total, status };
+}
+
+function calculateDays(startDateStr) {
+    if (!startDateStr) return 0;
+    const start = new Date(startDateStr);
+    const now = new Date();
+    const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    return Math.max(0, diff);
+}
+
+function isStageLocked(personId, stageIndex) {
+    if (stageIndex === 0) return false;
+    const person = state.data.persons.find(p => p.id === personId);
+    if (!person) return true;
+    const stages = getStagesForTrack(person.track);
+    const thresholds = loadThresholds();
+    const prevStatus = getStageStatus(personId, stageIndex - 1, stages, thresholds);
+    return prevStatus !== '已完成';
+}
+
+// ==================== COMPONENTS ====================
+function renderHome() {
+    const data = state.data;
+    const totalPersons = data.persons.length;
+    const completedPersons = data.persons.filter(p => calculateProgress(p.id).status === '已完成').length;
+    const inProgressPersons = data.persons.filter(p => calculateProgress(p.id).status === '进行中').length;
+
+    let html = `
+        <div class="header">
+            <h1>🚀 Project Power <span>· PMO进度管理</span></h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showAddPerson()">➕ 新增人员</button>
+                <button class="btn btn-back" onclick="resetData()">🔄 重置</button>
+            </div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-card"><div class="num">${totalPersons}</div><div class="label">总人数</div></div>
+            <div class="stat-card"><div class="num">${inProgressPersons}</div><div class="label">进行中</div></div>
+            <div class="stat-card"><div class="num">${completedPersons}</div><div class="label">已完成</div></div>
+            <div class="stat-card"><div class="num">${totalPersons > 0 ? Math.round(completedPersons/totalPersons*100) : 0}%</div><div class="label">整体完成率</div></div>
+        </div>
+        <div class="grid">
+    `;
+
+    data.persons.forEach(p => {
+        const prog = calculateProgress(p.id);
+        const days = calculateDays(p.startDate);
+        html += `
+            <div class="card ${p.track}" onclick="goToDetail('${p.id}')">
+                <div class="card-header">
+                    <span class="card-name">${p.name}</span>
+                    <span class="tag ${p.track}">${p.track}</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-item"><div class="value">${days}</div><div class="label">累计天数</div></div>
+                    <div class="card-item"><div class="value">${prog.percentDisplay}%</div><div class="label">进度</div></div>
+                    <div class="card-item"><div class="value">${prog.completed}/${prog.total}</div><div class="label">阶段完成</div></div>
+                    <div class="card-item">
+                        <span class="status-badge ${prog.status}">${prog.status}</span>
+                    </div>
+                </div>
+                <div class="progress-bar"><div class="fill" style="width:${prog.percent}%"></div></div>
+                <div class="card-footer">
+                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();goToDetail('${p.id}')">📋 进入详情编辑</button>
+                </div>
+            </div>
+        `;
+    });
+
+    if (data.persons.length === 0) {
+        html += `
+            <div class="empty-state" style="grid-column:1/-1;">
+                <div class="icon">📋</div>
+                <h3>暂无人员数据</h3>
+                <p style="margin-top:8px;color:#bbb;">点击右上角「新增人员」开始使用</p>
+            </div>
+        `;
+    }
+
+    html += '</div>';
+    document.getElementById('app').innerHTML = html;
+}
+
+function goToDetail(personId) {
+    state.currentPage = 'detail';
+    state.currentPersonId = personId;
+    renderDetail(personId);
+}
+
+function goHome() {
+    state.currentPage = 'home';
+    state.currentPersonId = null;
+    renderHome();
+}
+
+function renderDetail(personId) {
+    const person = state.data.persons.find(p => p.id === personId);
+    if (!person) { goHome(); return; }
+    const stages = getStagesForTrack(person.track);
+    const thresholds = loadThresholds();
+    const trackKey = person.track === '求职' ? 'job' : 'love';
+    const prog = calculateProgress(personId);
+    const days = calculateDays(person.startDate);
+
+    let html = `
+        <div class="detail-page">
+            <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+                <button class="btn btn-primary" onclick="goHome()" style="background:rgba(255,255,255,0.9);color:#667eea;font-weight:600;">← 返回总览</button>
+                <button class="btn btn-danger btn-sm" onclick="deletePerson('${personId}')" style="margin-left:auto;">🗑 删除人员</button>
+            </div>
+            <div class="person-header">
+                <h2>${person.name} <span class="tag ${person.track}">${person.track}</span></h2>
+                <div class="meta">
+                    <div class="item">📅 累计天数：<span class="num">${days}</span> 天</div>
+                    <div class="item">📊 进度：<span class="num">${prog.percentDisplay}%</span> (${prog.completed}/${prog.total})</div>
+                    <div class="item">状态：<span class="status-badge ${prog.status}">${prog.status}</span></div>
+                    <div class="item">
+                        <label style="font-size:13px;color:#999;">起始日期：</label>
+                        <input type="date" class="date-input" value="${person.startDate}" onchange="updateStartDate('${personId}', this.value)">
+                    </div>
+                </div>
+                <div class="progress-bar" style="margin-top:16px;"><div class="fill" style="width:${prog.percent}%"></div></div>
+            </div>
+            <div class="stages">
+    `;
+
+    stages.forEach((stage, idx) => {
+        const p = state.data.progresses[personId] || { stages: {} };
+        const s = p.stages[idx] || { value: 0, status: '未开始', manualStatus: null };
+        const locked = isStageLocked(personId, idx);
+        const currentStatus = getStageStatus(personId, idx, stages, thresholds);
+        const stageClass = locked ? 'locked' : (currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : ''));
+        const indexClass = currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : '');
+
+        html += `
+            <div class="stage-card ${stageClass}">
+                <div class="stage-top">
+                    <div class="stage-name">
+                        <span class="stage-index ${indexClass}">${idx+1}</span>
+                        ${stage.name}
+                        <span class="status-badge ${currentStatus}" style="font-size:11px;padding:2px 10px;">${currentStatus}</span>
+                    </div>
+                </div>
+                <div class="stage-controls">
+        `;
+
+        if (stage.hasNumber) {
+            const val = s.value || 0;
+            const th = thresholds[trackKey] && thresholds[trackKey][idx];
+            const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
+            html += `
+                <div>
+                    <input type="number" min="0" value="${val}" ${locked ? 'disabled' : ''} 
+                        onchange="updateStageValue('${personId}', ${idx}, this.value)">
+                    <span class="stage-threshold">(阈值: ${thresholdVal})</span>
+                    <button class="config-btn" onclick="event.stopPropagation();showThresholdConfig('${personId}', ${idx})">⚙️ 修改阈值</button>
+                </div>
+            `;
+        } else {
+            html += `<span style="color:#999;font-size:13px;">📌 固定完成类阶段</span>`;
+        }
+
+        html += `
+            <div>
+                <select ${locked ? 'disabled' : ''} onchange="updateStageStatus('${personId}', ${idx}, this.value)">
+                    <option value="未开始" ${currentStatus === '未开始' ? 'selected' : ''}>未开始</option>
+                    <option value="进行中" ${currentStatus === '进行中' ? 'selected' : ''}>进行中</option>
+                    <option value="已完成" ${currentStatus === '已完成' ? 'selected' : ''}>已完成</option>
+                </select>
+            </div>
+        `;
+
+        html += `</div></div>`;
+    });
+
+    html += `
+            </div>
+            <div style="text-align:center;margin-top:24px;padding:20px;">
+                <button class="btn btn-primary" onclick="goHome()" style="background:#667eea;color:white;padding:12px 40px;font-size:16px;">← 返回总览</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('app').innerHTML = html;
+}
+
+// ==================== ACTIONS ====================
+function updateStartDate(personId, date) {
+    const person = state.data.persons.find(p => p.id === personId);
+    if (person) {
+        person.startDate = date;
+        saveData();
+        renderDetail(personId);
+    }
+}
+
+function updateStageValue(personId, stageIndex, value) {
+    if (!state.data.progresses[personId]) {
+        state.data.progresses[personId] = { stages: {} };
+    }
+    const s = state.data.progresses[personId].stages;
+    if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
+    s[stageIndex].value = parseInt(value) || 0;
+    // Clear manual status when value changes
+    s[stageIndex].manualStatus = null;
+    saveData();
+    renderDetail(personId);
+}
+
+function updateStageStatus(personId, stageIndex, status) {
+    if (!state.data.progresses[personId]) {
+        state.data.progresses[personId] = { stages: {} };
+    }
+    const s = state.data.progresses[personId].stages;
+    if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
+    s[stageIndex].manualStatus = status;
+    s[stageIndex].status = status;
+    saveData();
+    renderDetail(personId);
+}
+
+function showAddPerson() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal">
+            <h3>➕ 新增人员</h3>
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" id="newPersonName" placeholder="请输入姓名" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label>赛道</label>
+                <select id="newPersonTrack">
+                    <option value="求职">求职</option>
+                    <option value="找对象">找对象</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">取消</button>
+                <button class="btn btn-primary" onclick="confirmAddPerson()">确认添加</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    setTimeout(() => document.getElementById('newPersonName').focus(), 100);
+}
+
+function confirmAddPerson() {
+    const name = document.getElementById('newPersonName').value.trim();
+    const track = document.getElementById('newPersonTrack').value;
+    if (!name) { alert('请输入姓名'); return; }
+    const id = 'p_' + Date.now();
+    state.data.persons.push({ id, name, track, startDate: new Date().toISOString().split('T')[0] });
+    saveData();
+    document.querySelector('.modal-overlay').remove();
+    renderHome();
+}
+
+function deletePerson(personId) {
+    if (!confirm('确定要删除该人员及其所有进度数据吗？')) return;
+    state.data.persons = state.data.persons.filter(p => p.id !== personId);
+    delete state.data.progresses[personId];
+    saveData();
+    goHome();
+}
+
+function resetData() {
+    if (!confirm('确定要重置所有数据吗？（将恢复到初始示例数据）')) return;
+    localStorage.removeItem(PERSONAL_CONFIG_KEY);
+    localStorage.removeItem(THRESHOLD_CONFIG_KEY);
+    loadData();
+    renderHome();
+}
+
+function showThresholdConfig(personId, stageIndex) {
+    const person = state.data.persons.find(p => p.id === personId);
+    if (!person) return;
+    const trackKey = person.track === '求职' ? 'job' : 'love';
+    const stages = getStagesForTrack(person.track);
+    const stage = stages[stageIndex];
+    const thresholds = loadThresholds();
+    const current = (thresholds[trackKey] && thresholds[trackKey][stageIndex]) 
+        ? thresholds[trackKey][stageIndex].threshold 
+        : (stage.defaultThreshold || 1);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal">
+            <h3>⚙️ 修改阈值</h3>
+            <p style="color:#666;margin-bottom:16px;">阶段：${stage.name}</p>
+            <div class="form-group">
+                <label>量化阈值</label>
+                <input type="number" id="thresholdInput" value="${current}" min="1">
+                <span style="font-size:12px;color:#999;margin-top:4px;display:block;">达到该数值时自动判定为进行中/已完成</span>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">取消</button>
+                <button class="btn btn-primary" onclick="confirmThresholdConfig('${personId}', ${stageIndex})">确认修改</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function confirmThresholdConfig(personId, stageIndex) {
+    const val = parseInt(document.getElementById('thresholdInput').value);
+    if (!val || val < 1) { alert('请输入有效的阈值（≥1）'); return; }
+    const person = state.data.persons.find(p => p.id === personId);
+    if (!person) return;
+    const trackKey = person.track === '求职' ? 'job' : 'love';
+    const thresholds = loadThresholds();
+    if (!thresholds[trackKey]) thresholds[trackKey] = {};
+    if (!thresholds[trackKey][stageIndex]) thresholds[trackKey][stageIndex] = {};
+    thresholds[trackKey][stageIndex].threshold = val;
+    saveThresholds(thresholds);
+    document.querySelector('.modal-overlay').remove();
+    renderDetail(personId);
+}
+
+// ==================== INIT ====================
+loadData();
+renderHome();
+</script>
+</body>
+</html>
