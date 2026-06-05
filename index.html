@@ -254,8 +254,7 @@ async function getStageStatus(personId, stageIndex, stages, thresholds) {
   if (!p || !p.stages) return '未开始';
   const s = p.stages[stageIndex];
   if (!s) return '未开始';
-  // 优先使用手动设置的状态
-  if (s.manualStatus) return s.manualStatus;
+  if (s.manualStatus) { console.log('getStageStatus returning manualStatus:', s.manualStatus); return s.manualStatus; }
   if (s.status) return s.status;
   const stage = stages[stageIndex];
   if (!stage.hasNumber) return '未开始';
@@ -579,15 +578,18 @@ async function updateStageValue(personId, stageIndex, value) {
 }
 
 async function updateStageStatus(personId, stageIndex, status) {
+  console.log('updateStageStatus called:', personId, stageIndex, status);
   if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: {} };
   const s = state.data.progresses[personId].stages;
   if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
   s[stageIndex].manualStatus = status;
   s[stageIndex].status = status;
+  console.log('state.data after set:', JSON.stringify(state.data.progresses[personId].stages));
   await supabase.from('progresses').upsert(
     { person_id: personId, stages: state.data.progresses[personId].stages || {} },
     { onConflict: 'person_id' }
   );
+  console.log('Saved to supabase, now re-rendering...');
   await renderDetail(personId, false);
 }
 
