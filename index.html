@@ -435,16 +435,16 @@ async function renderHome() {
   document.getElementById('app').innerHTML = html;
 }
 
-function goToDetail(personId) {
+async function goToDetail(personId) {
   state.currentPage = 'detail';
   state.currentPersonId = personId;
-  renderDetail(personId);
+  await renderDetail(personId);
 }
 
-function goHome() {
+async function goHome() {
   state.currentPage = 'home';
   state.currentPersonId = null;
-  renderHome();
+  await renderHome();
 }
 
 async function renderDetail(personId) {
@@ -965,7 +965,9 @@ async function deleteCommentConfirm(commentId, personId, stageIndex) {
 }
 
 // ==================== INIT ====================
-renderHome();
+(async () => {
+  await renderHome();
+})();
 </script>
 </body>
 </html>
