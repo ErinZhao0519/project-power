@@ -254,7 +254,7 @@ async function getStageStatus(personId, stageIndex, stages, thresholds) {
   if (!p || !p.stages) return '未开始';
   const s = p.stages[stageIndex];
   if (!s) return '未开始';
-  if (s.manualStatus) { console.log('getStageStatus returning manualStatus:', s.manualStatus); return s.manualStatus; }
+  if (s.manualStatus) return s.manualStatus;
   if (s.status) return s.status;
   const stage = stages[stageIndex];
   if (!stage.hasNumber) return '未开始';
@@ -574,23 +574,25 @@ async function updateStageValue(personId, stageIndex, value) {
   s[stageIndex].value = parseInt(value) || 0;
   s[stageIndex].manualStatus = null;
   await saveData();
-  await renderDetail(personId, false);
+  await renderDetail(personId, true);
 }
 
 async function updateStageStatus(personId, stageIndex, status) {
-  console.log('updateStageStatus called:', personId, stageIndex, status);
   if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: {} };
   const s = state.data.progresses[personId].stages;
   if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
   s[stageIndex].manualStatus = status;
   s[stageIndex].status = status;
-  console.log('state.data after set:', JSON.stringify(state.data.progresses[personId].stages));
-  await supabase.from('progresses').upsert(
-    { person_id: personId, stages: state.data.progresses[personId].stages || {} },
-    { onConflict: 'person_id' }
-  );
-  console.log('Saved to supabase, now re-rendering...');
-  await renderDetail(personId, false);
+  // Save to supabase - upsert using person_id as pk
+  const { error } = await supabase
+    .from('progresses')
+    .upsert({ person_id: personId, stages: state.data.progresses[personId].stages }, { 
+      onConflict: 'person_id',
+      ignoreDuplicates: false 
+    });
+  if (error) console.error('Progress save error:', error);
+  // Always use in-memory state to render (skip DB reload to avoid stale data)
+  await renderDetail(personId, true);
 }
 
 function showAddPerson() {
