@@ -273,11 +273,12 @@ async function saveThresholds(thresholds) {
 }
 
 function getStagesForTrack(person) {
-  if (!person) return [];
+  if (!person) { console.log('getStagesForTrack: person is null'); return []; }
   if (person.track === '求职') return JOB_STAGES;
   if (person.track === '找对象') return LOVE_STAGES;
   // 自定义赛道：从 progresses 中读取 stage_defs
   const p = state.data.progresses[person.id];
+  console.log('getStagesForTrack custom:', person.id, person.track, 'stages data:', p);
   if (p && p.stages && p.stages.stage_defs && p.stages.stage_defs.length > 0) return p.stages.stage_defs;
   return [{ name: '尚未定义阶段', hasNumber: false, key: 'placeholder' }];
 }
@@ -418,6 +419,8 @@ function formatTime(isoStr) {
 async function renderHome() {
   await loadData();
   const data = state.data;
+  console.log('renderHome: persons=', data.persons.map(p => ({id: p.id, name: p.name, track: p.track})));
+  console.log('renderHome: progresses keys=', Object.keys(data.progresses));
   const totalPersons = data.persons.length;
   let completedPersons = 0, inProgressPersons = 0;
   for (const p of data.persons) {
