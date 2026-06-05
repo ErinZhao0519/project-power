@@ -775,16 +775,14 @@ async function confirmAddPerson() {
   const name = document.getElementById('newPersonName').value.trim();
   let track = document.getElementById('newPersonTrack').value;
   if (!name) { alert('请输入姓名'); return; }
+  const id = 'p_' + Date.now();
   if (track === '自定义') {
     const customName = document.getElementById('newCustomTrackName').value.trim();
     if (!customName) { alert('请输入自定义赛道名称'); return; }
-    track = customName; // 把自定义赛道名称存在 track 字段里
-  }
-  const id = 'p_' + Date.now();
-  state.data.persons.push({ id, name, track, startDate: new Date().toISOString().split('T')[0] });
-  // 自定义赛道初始化 stage_defs
-  if (track !== '求职' && track !== '找对象') {
-    if (!state.data.progresses[id]) state.data.progresses[id] = { stages: { stage_defs: [] } };
+    state.data.persons.push({ id, name, track: '自定义', startDate: new Date().toISOString().split('T')[0] });
+    if (!state.data.progresses[id]) state.data.progresses[id] = { stages: { stage_defs: [], track_name: customName } };
+  } else {
+    state.data.persons.push({ id, name, track, startDate: new Date().toISOString().split('T')[0] });
   }
   await saveData();
   document.querySelector('.modal-overlay').remove();
