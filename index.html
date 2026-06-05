@@ -254,9 +254,11 @@ async function getStageStatus(personId, stageIndex, stages, thresholds) {
   if (!p || !p.stages) return '未开始';
   const s = p.stages[stageIndex];
   if (!s) return '未开始';
+  // 优先使用手动设置的状态
   if (s.manualStatus) return s.manualStatus;
+  if (s.status) return s.status;
   const stage = stages[stageIndex];
-  if (!stage.hasNumber) return s.status || '未开始';
+  if (!stage.hasNumber) return '未开始';
   const val = s.value || 0;
   if (val === 0) return '未开始';
   const person = state.data.persons.find(pr => pr.id === personId);
@@ -375,7 +377,6 @@ function formatTime(isoStr) {
 
 // ==================== COMPONENTS ====================
 async function renderHome() {
-  await loadData();
   const data = state.data;
   const totalPersons = data.persons.length;
   let completedPersons = 0, inProgressPersons = 0;
@@ -446,7 +447,6 @@ async function goHome() {
 }
 
 async function renderDetail(personId) {
-  await loadData();
   const person = state.data.persons.find(p => p.id === personId);
   if (!person) { goHome(); return; }
   const stages = getStagesForTrack(person.track);
@@ -582,7 +582,12 @@ async function updateStageStatus(personId, stageIndex, status) {
   if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
   s[stageIndex].manualStatus = status;
   s[stageIndex].status = status;
-  await saveData();
+  // Save directly to Supabase without full saveData (skip persons save)
+  const { error } = await supabase.from('progresses').upsert(
+    { person_id: personId, stages: state.data.progresses[personId].stages || {} },
+    { onConflict: 'person_id' }
+  );
+  if (error) console.error('updateStageStatus save error:', error);
   renderDetail(personId);
 }
 
