@@ -82,6 +82,15 @@
         .modal .form-group input, .modal .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e8e8e8; border-radius: 10px; font-size: 14px; outline: none; }
         .modal .form-group input:focus, .modal .form-group select:focus { border-color: #667eea; }
         .modal .modal-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; }
+        .edit-stage-row { display: flex; gap: 8px; align-items: center; padding: 8px 4px; border-bottom: 1px solid #f0f0f0; }
+        .edit-stage-row:last-child { border-bottom: none; }
+        .edit-stage-row .stage-name-input { flex: 1; min-width: 0; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+        .edit-stage-row .stage-name-input:focus { border-color: #667eea; }
+        .edit-stage-row .stage-threshold-input { padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; text-align: center; outline: none; }
+        .edit-stage-row .stage-threshold-input:focus { border-color: #667eea; }
+        .stage-card[draggable="true"] { cursor: default; }
+        .stage-card.drag-over { border-color: #667eea; box-shadow: 0 0 0 2px rgba(102,126,234,0.3); }
+        .stage-card.dragging { opacity: 0.5; }
         .modal .btn-cancel { padding: 10px 24px; border: 2px solid #e8e8e8; border-radius: 10px; background: white; cursor: pointer; font-size: 14px; }
         .modal .btn-cancel:hover { background: #f5f5f5; }
         .config-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 12px; text-decoration: underline; padding: 2px 6px; }
@@ -263,8 +272,14 @@ async function saveThresholds(thresholds) {
   }
 }
 
-function getStagesForTrack(track) {
-    return track === '求职' ? JOB_STAGES : LOVE_STAGES;
+function getStagesForTrack(person) {
+  if (!person) return [];
+  if (person.track === '求职') return JOB_STAGES;
+  if (person.track === '找对象') return LOVE_STAGES;
+  // 自定义赛道：从 progresses 中读取 stage_defs
+  const p = state.data.progresses[person.id];
+  if (p && p.stages && p.stages.stage_defs) return p.stages.stage_defs;
+  return [];
 }
 
 async function getStageStatus(personId, stageIndex, stages, thresholds) {
@@ -275,13 +290,19 @@ async function getStageStatus(personId, stageIndex, stages, thresholds) {
   if (s.manualStatus) return s.manualStatus;
   if (s.status) return s.status;
   const stage = stages[stageIndex];
+  if (!stage) return '未开始';
   if (!stage.hasNumber) return '未开始';
   const val = s.value || 0;
   if (val === 0) return '未开始';
   const person = state.data.persons.find(pr => pr.id === personId);
-  const trackKey = person?.track === '求职' ? 'job' : 'love';
-  const th = thresholds[trackKey] && thresholds[trackKey][stageIndex];
-  const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
+  // 自定义赛道：阈值从 stage_def 的 threshold 取
+  let thresholdVal = stage.defaultThreshold || 1;
+  if (stage.threshold !== undefined) thresholdVal = stage.threshold;
+  if (!person || person.track === '求职' || person.track === '找对象') {
+    const trackKey = person?.track === '求职' ? 'job' : 'love';
+    const th = thresholds[trackKey] && thresholds[trackKey][stageIndex];
+    if (th) thresholdVal = th.threshold;
+  }
   if (thresholdVal >= 10) return val >= thresholdVal ? '已完成' : '进行中';
   if (thresholdVal >= 5) return val >= thresholdVal ? '已完成' : '进行中';
   if (thresholdVal === 3) return val >= thresholdVal ? '进行中' : (val > 0 ? '进行中' : '未开始');
@@ -292,7 +313,7 @@ async function getStageStatus(personId, stageIndex, stages, thresholds) {
 async function calculateProgress(personId) {
   const person = state.data.persons.find(p => p.id === personId);
   if (!person) return { percent: 0, completed: 0, total: 0, status: '未开始' };
-  const stages = getStagesForTrack(person.track);
+  const stages = getStagesForTrack(person);
   const thresholds = await loadThresholds();
   let completed = 0, started = false;
   for (let idx = 0; idx < stages.length; idx++) {
@@ -319,7 +340,7 @@ async function isStageLocked(personId, stageIndex) {
   if (stageIndex === 0) return false;
   const person = state.data.persons.find(p => p.id === personId);
   if (!person) return true;
-  const stages = getStagesForTrack(person.track);
+  const stages = getStagesForTrack(person);
   const thresholds = await loadThresholds();
   const prevStatus = await getStageStatus(personId, stageIndex - 1, stages, thresholds);
   return prevStatus !== '已完成';
@@ -469,7 +490,7 @@ async function renderDetail(personId, skipLoad) {
   if (!skipLoad) await loadData();
   const person = state.data.persons.find(p => p.id === personId);
   if (!person) { goHome(); return; }
-  const stages = getStagesForTrack(person.track);
+  const stages = getStagesForTrack(person);
   const thresholds = await loadThresholds();
   const trackKey = person.track === '求职' ? 'job' : 'love';
   const prog = await calculateProgress(personId);
@@ -494,6 +515,12 @@ async function renderDetail(personId, skipLoad) {
         </div>
         <div class="progress-bar" style="margin-top:16px;"><div class="fill" style="width:${prog.percent}%"></div></div>
       </div>
+      ${person.track !== '求职' && person.track !== '找对象' ? `
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;background:rgba(255,255,255,0.05);padding:12px 16px;border-radius:12px;">
+        <span style="font-size:14px;color:#ccc;">🏷️ 自定义赛道：<strong>${person.track}</strong></span>
+        <button class="btn btn-primary btn-sm" onclick="showEditStages('${personId}')">✏️ 编辑阶段</button>
+      </div>
+      ` : ''}
       <div class="stages">
   `;
 
@@ -507,12 +534,14 @@ async function renderDetail(personId, skipLoad) {
     const indexClass = currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : '');
 
     html += `
-      <div class="stage-card ${stageClass}">
+      <div class="stage-card ${stageClass}" ${person.track !== '求职' && person.track !== '找对象' ? `draggable="true" data-stage-idx="${idx}"` : ''}>
         <div class="stage-top">
           <div class="stage-name">
+            ${person.track !== '求职' && person.track !== '找对象' ? `<span class="drag-handle" style="cursor:grab;margin-right:6px;font-size:16px;color:#999;user-select:none;">⠿</span>` : ''}
             <span class="stage-index ${indexClass}">${idx+1}</span>
             ${stage.name}
             <span class="status-badge ${currentStatus}" style="font-size:11px;padding:2px 10px;">${currentStatus}</span>
+            ${person.track !== '求职' && person.track !== '找对象' ? `<button class="config-btn" onclick="event.stopPropagation();deleteStageDef('${personId}', ${idx})" style="margin-left:auto;color:#ff4d4f;" title="删除阶段">✕</button>` : ''}
           </div>
         </div>
         <div class="stage-controls">
@@ -520,14 +549,17 @@ async function renderDetail(personId, skipLoad) {
 
     if (stage.hasNumber) {
       const val = s.value || 0;
-      const th = thresholds[trackKey] && thresholds[trackKey][idx];
-      const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
+      let thresholdVal = stage.threshold !== undefined ? stage.threshold : (stage.defaultThreshold || 1);
+      if (person.track === '求职' || person.track === '找对象') {
+        const th = thresholds[trackKey] && thresholds[trackKey][idx];
+        if (th) thresholdVal = th.threshold;
+      }
       html += `
         <div>
           <input type="number" min="0" value="${val}" ${locked ? 'disabled' : ''}
             onchange="updateStageValue('${personId}', ${idx}, this.value)">
           <span class="stage-threshold">(阈值: ${thresholdVal})</span>
-          <button class="config-btn" onclick="event.stopPropagation();showThresholdConfig('${personId}', ${idx})">⚙️ 修改阈值</button>
+          ${person.track === '求职' || person.track === '找对象' ? `<button class="config-btn" onclick="event.stopPropagation();showThresholdConfig('${personId}', ${idx})">⚙️ 修改阈值</button>` : ''}
         </div>
       `;
     } else {
@@ -574,6 +606,93 @@ async function renderDetail(personId, skipLoad) {
     renderLogs(personId, idx);
     renderComments(personId, idx);
   }
+
+  // Bind drag & drop for custom tracks
+  const stageCards = document.querySelectorAll('.stage-card[draggable="true"]');
+  stageCards.forEach(card => {
+    card.addEventListener('dragstart', onDragStart);
+    card.addEventListener('dragend', onDragEnd);
+    card.addEventListener('dragover', onDragOver);
+    card.addEventListener('dragleave', onDragLeave);
+    card.addEventListener('drop', onDrop);
+  });
+}
+
+// ==================== DRAG & DROP ====================
+let dragSourceIdx = null;
+
+function onDragStart(e) {
+  dragSourceIdx = parseInt(e.target.dataset.stageIdx);
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onDragEnd(e) {
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.stage-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+  dragSourceIdx = null;
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const target = e.currentTarget;
+  if (target.dataset.stageIdx !== String(dragSourceIdx)) {
+    target.classList.add('drag-over');
+  }
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+async function onDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const targetIdx = parseInt(e.currentTarget.dataset.stageIdx);
+  if (dragSourceIdx === null || dragSourceIdx === targetIdx) return;
+
+  const personId = state.currentPersonId;
+  const person = state.data.persons.find(p => p.id === personId);
+  if (!person || person.track === '求职' || person.track === '找对象') return;
+  const p = state.data.progresses[personId];
+  if (!p || !p.stages || !p.stages.stage_defs) return;
+
+  const defs = p.stages.stage_defs;
+  const [moved] = defs.splice(dragSourceIdx, 1);
+  defs.splice(targetIdx, 0, moved);
+
+  // Rebuild stages progress data
+  const newStages = { stage_defs: defs };
+  for (let i = 0; i < defs.length; i++) {
+    const oldIdx = i === dragSourceIdx ? targetIdx : (i < Math.min(dragSourceIdx, targetIdx) || i > Math.max(dragSourceIdx, targetIdx) ? i : (i + (dragSourceIdx < targetIdx ? -1 : 1)));
+    // Simpler approach: try each possible old index
+    for (const possibleOld of [i, dragSourceIdx, targetIdx]) {
+      if (p.stages[possibleOld] !== undefined && !newStages[i]) {
+        // Check if this old stage belongs to this new position
+        const oldDefIdx = defs.indexOf(moved);
+        if (possibleOld === oldDefIdx) continue;
+      }
+    }
+    if (p.stages[oldIdx] !== undefined) newStages[i] = p.stages[oldIdx];
+  }
+  // Direct approach: just swap values
+  const oldData = {};
+  for (const [k, v] of Object.entries(p.stages)) {
+    if (k === 'stage_defs') continue;
+    oldData[parseInt(k)] = v;
+  }
+  const newData = {};
+  const keys = Object.keys(oldData).map(Number).sort((a,b) => a-b);
+  for (let i = 0; i < defs.length; i++) {
+    if (i < keys.length && oldData[keys[i]] !== undefined) {
+      newData[i] = oldData[keys[i]];
+    }
+  }
+  newData.stage_defs = defs;
+  p.stages = newData;
+  await saveData();
+  renderDetail(personId);
 }
 
 // ==================== ACTIONS ====================
@@ -624,10 +743,15 @@ function showAddPerson() {
       </div>
       <div class="form-group">
         <label>赛道</label>
-        <select id="newPersonTrack">
+        <select id="newPersonTrack" onchange="onTrackChange()">
           <option value="求职">求职</option>
           <option value="找对象">找对象</option>
+          <option value="自定义">自定义</option>
         </select>
+      </div>
+      <div class="form-group" id="customTrackGroup" style="display:none;">
+        <label>赛道名称</label>
+        <input type="text" id="newCustomTrackName" placeholder="例如：健身、学英语、副业..." maxlength="30">
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">取消</button>
@@ -639,12 +763,26 @@ function showAddPerson() {
   setTimeout(() => document.getElementById('newPersonName').focus(), 100);
 }
 
+function onTrackChange() {
+  const track = document.getElementById('newPersonTrack').value;
+  document.getElementById('customTrackGroup').style.display = track === '自定义' ? 'block' : 'none';
+}
+
 async function confirmAddPerson() {
   const name = document.getElementById('newPersonName').value.trim();
-  const track = document.getElementById('newPersonTrack').value;
+  let track = document.getElementById('newPersonTrack').value;
   if (!name) { alert('请输入姓名'); return; }
+  if (track === '自定义') {
+    const customName = document.getElementById('newCustomTrackName').value.trim();
+    if (!customName) { alert('请输入自定义赛道名称'); return; }
+    track = customName; // 把自定义赛道名称存在 track 字段里
+  }
   const id = 'p_' + Date.now();
   state.data.persons.push({ id, name, track, startDate: new Date().toISOString().split('T')[0] });
+  // 自定义赛道初始化 stage_defs
+  if (track !== '求职' && track !== '找对象') {
+    if (!state.data.progresses[id]) state.data.progresses[id] = { stages: { stage_defs: [] } };
+  }
   await saveData();
   document.querySelector('.modal-overlay').remove();
   renderHome();
@@ -659,6 +797,121 @@ async function deletePerson(personId) {
   await supabase.from('logs').delete().eq('person_id', personId);
   await supabase.from('comments').delete().eq('person_id', personId);
   goHome();
+}
+
+// ==================== CUSTOM TRACK: STAGE EDITING ====================
+async function showEditStages(personId) {
+  const person = state.data.persons.find(p => p.id === personId);
+  if (!person) return;
+  const p = state.data.progresses[personId];
+  const defs = (p && p.stages && p.stages.stage_defs) ? [...p.stages.stage_defs] : [];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  let defsHtml = defs.map((d, i) => `
+    <div class="edit-stage-row" data-idx="${i}">
+      <span class="drag-handle" style="cursor:grab;font-size:16px;color:#999;">⠿</span>
+      <input class="stage-name-input" value="${escapeHtml(d.name)}" placeholder="阶段名称" data-idx="${i}">
+      <label style="font-size:12px;white-space:nowrap;color:#aaa;">
+        <input type="checkbox" ${d.hasNumber ? 'checked' : ''} data-idx="${i}" class="stage-has-num">
+        有数字
+      </label>
+      <input class="stage-threshold-input" type="number" min="1" value="${d.threshold || d.defaultThreshold || 1}" placeholder="阈值" data-idx="${i}" style="width:60px;">
+      <button class="config-btn" style="color:#ff4d4f;" onclick="removeEditStageRow(this)">✕</button>
+    </div>
+  `).join('');
+
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:600px;">
+      <h3>✏️ 编辑阶段 - ${escapeHtml(person.track)}</h3>
+      <div id="edit-stages-list">
+        ${defsHtml || '<div style="color:#999;padding:16px;text-align:center;">暂无阶段，请添加</div>'}
+      </div>
+      <div style="margin-top:12px;">
+        <button class="btn btn-primary btn-sm" onclick="addEditStageRow()">➕ 添加阶段</button>
+      </div>
+      <div class="modal-actions" style="margin-top:16px;">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">取消</button>
+        <button class="btn btn-primary" onclick="confirmEditStages('${personId}')">保存阶段</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function addEditStageRow() {
+  const list = document.getElementById('edit-stages-list');
+  const emptyMsg = list.querySelector('div[style*="text-align:center"]');
+  if (emptyMsg) emptyMsg.remove();
+  const row = document.createElement('div');
+  row.className = 'edit-stage-row';
+  row.innerHTML = `
+    <span class="drag-handle" style="cursor:grab;font-size:16px;color:#999;">⠿</span>
+    <input class="stage-name-input" placeholder="阶段名称">
+    <label style="font-size:12px;white-space:nowrap;color:#aaa;">
+      <input type="checkbox" class="stage-has-num"> 有数字
+    </label>
+    <input class="stage-threshold-input" type="number" min="1" value="1" placeholder="阈值" style="width:60px;">
+    <button class="config-btn" style="color:#ff4d4f;" onclick="removeEditStageRow(this)">✕</button>
+  `;
+  list.appendChild(row);
+}
+
+function removeEditStageRow(btn) {
+  const row = btn.closest('.edit-stage-row');
+  const list = document.getElementById('edit-stages-list');
+  row.remove();
+  if (list.children.length === 0) {
+    list.innerHTML = '<div style="color:#999;padding:16px;text-align:center;">暂无阶段，请添加</div>';
+  }
+}
+
+async function confirmEditStages(personId) {
+  const rows = document.querySelectorAll('#edit-stages-list .edit-stage-row');
+  const defs = [];
+  for (const row of rows) {
+    const nameInput = row.querySelector('.stage-name-input');
+    const name = nameInput.value.trim();
+    if (!name) continue;
+    const hasNum = row.querySelector('.stage-has-num').checked;
+    const thresholdInput = row.querySelector('.stage-threshold-input');
+    const threshold = thresholdInput ? parseInt(thresholdInput.value) || 1 : 1;
+    defs.push({ name, hasNumber: hasNum, threshold, key: 'custom_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5) });
+  }
+  if (defs.length === 0) { alert('请至少添加一个阶段'); return; }
+  if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: { stage_defs: [] } };
+  const oldStages = state.data.progresses[personId].stages || {};
+  const newStages = { stage_defs: defs };
+  for (const [key, val] of Object.entries(oldStages)) {
+    if (key === 'stage_defs') continue;
+    const idx = parseInt(key);
+    if (!isNaN(idx) && idx < defs.length) {
+      newStages[key] = val;
+    }
+  }
+  state.data.progresses[personId].stages = newStages;
+  await saveData();
+  document.querySelector('.modal-overlay').remove();
+  renderDetail(personId);
+}
+
+async function deleteStageDef(personId, stageIndex) {
+  if (!confirm('确定删除这个阶段及其所有进度数据吗？')) return;
+  const person = state.data.persons.find(p => p.id === personId);
+  if (!person || person.track === '求职' || person.track === '找对象') return;
+  const p = state.data.progresses[personId];
+  if (!p || !p.stages || !p.stages.stage_defs) return;
+  const defs = p.stages.stage_defs;
+  if (stageIndex < 0 || stageIndex >= defs.length) return;
+  defs.splice(stageIndex, 1);
+  const newStages = { stage_defs: defs };
+  for (let i = 0; i < defs.length; i++) {
+    const oldIdx = i < stageIndex ? i : i + 1;
+    if (p.stages[oldIdx]) newStages[i] = p.stages[oldIdx];
+  }
+  p.stages = newStages;
+  await saveData();
+  renderDetail(personId);
 }
 
 async function resetData() {
