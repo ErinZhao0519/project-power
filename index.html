@@ -194,7 +194,7 @@ const LOVE_STAGES = [
 ];
 
 // ==================== SUPABASE HELPERS ====================
-let state = { currentPage: 'home', currentPersonId: null };
+let state = { currentPage: 'home', currentPersonId: null, data: { persons: [], progresses: {} } };
 
 async function ensurePersonsTable() {
   const { error } = await supabase.rpc('create_persons_table_if_not_exists');
@@ -377,6 +377,7 @@ function formatTime(isoStr) {
 
 // ==================== COMPONENTS ====================
 async function renderHome() {
+  await loadData();
   const data = state.data;
   const totalPersons = data.persons.length;
   let completedPersons = 0, inProgressPersons = 0;
@@ -446,7 +447,8 @@ async function goHome() {
   await renderHome();
 }
 
-async function renderDetail(personId) {
+async function renderDetail(personId, skipLoad) {
+  if (!skipLoad) await loadData();
   const person = state.data.persons.find(p => p.id === personId);
   if (!person) { goHome(); return; }
   const stages = getStagesForTrack(person.track);
@@ -569,26 +571,26 @@ async function updateStartDate(personId, date) {
 async function updateStageValue(personId, stageIndex, value) {
   if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: {} };
   const s = state.data.progresses[personId].stages;
-  if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
-  s[stageIndex].value = parseInt(value) || 0;
-  s[stageIndex].manualStatus = null;
+  const key = String(stageIndex);
+  if (!s[key]) s[key] = { value: 0, status: '未开始', manualStatus: null };
+  s[key].value = parseInt(value) || 0;
+  s[key].manualStatus = null;
   await saveData();
-  renderDetail(personId);
+  renderDetail(personId, false);
 }
 
 async function updateStageStatus(personId, stageIndex, status) {
   if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: {} };
   const s = state.data.progresses[personId].stages;
-  if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
-  s[stageIndex].manualStatus = status;
-  s[stageIndex].status = status;
-  // Save directly to Supabase without full saveData (skip persons save)
-  const { error } = await supabase.from('progresses').upsert(
+  if (!s[str(stageIndex)]) s[str(stageIndex)] = { value: 0, status: '未开始', manualStatus: null };
+  s[str(stageIndex)].manualStatus = status;
+  s[str(stageIndex)].status = status;
+  await supabase.from('progresses').upsert(
     { person_id: personId, stages: state.data.progresses[personId].stages || {} },
     { onConflict: 'person_id' }
   );
-  if (error) console.error('updateStageStatus save error:', error);
-  renderDetail(personId);
+  // Re-render without re-loading from DB (use current state)
+  await renderDetail(personId, false);
 }
 
 function showAddPerson() {
