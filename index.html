@@ -571,25 +571,23 @@ async function updateStartDate(personId, date) {
 async function updateStageValue(personId, stageIndex, value) {
   if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: {} };
   const s = state.data.progresses[personId].stages;
-  const key = String(stageIndex);
-  if (!s[key]) s[key] = { value: 0, status: '未开始', manualStatus: null };
-  s[key].value = parseInt(value) || 0;
-  s[key].manualStatus = null;
+  if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
+  s[stageIndex].value = parseInt(value) || 0;
+  s[stageIndex].manualStatus = null;
   await saveData();
-  renderDetail(personId, false);
+  await renderDetail(personId, false);
 }
 
 async function updateStageStatus(personId, stageIndex, status) {
   if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: {} };
   const s = state.data.progresses[personId].stages;
-  if (!s[str(stageIndex)]) s[str(stageIndex)] = { value: 0, status: '未开始', manualStatus: null };
-  s[str(stageIndex)].manualStatus = status;
-  s[str(stageIndex)].status = status;
+  if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
+  s[stageIndex].manualStatus = status;
+  s[stageIndex].status = status;
   await supabase.from('progresses').upsert(
     { person_id: personId, stages: state.data.progresses[personId].stages || {} },
     { onConflict: 'person_id' }
   );
-  // Re-render without re-loading from DB (use current state)
   await renderDetail(personId, false);
 }
 
