@@ -49,8 +49,8 @@
         .card-footer { margin-top: 16px; display: flex; justify-content: center; }
         .progress-bar { width: 100%; height: 6px; background: #f0f0f0; border-radius: 3px; margin-top: 12px; overflow: hidden; }
         .progress-bar .fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.5s ease; }
-        .detail-page { animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .detail-page { animation: fadeIn 0.15s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .person-header { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
         .person-header h2 { font-size: 28px; margin-bottom: 8px; }
         .person-header .meta { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
@@ -101,11 +101,34 @@
 <body>
 <div class="app" id="app"></div>
 <script>
-// ==================== SUPABASE CONFIG ====================
-const SUPABASE_URL = 'https://hikmgzhhoyenptmmljgx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpa21nemhob3llbnB0bW1samd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjE5NzYsImV4cCI6MjA5NjE5Nzk3Nn0.1nOVokhJ9gDDEiJ3Ojt6Zah80wxf83NmWEoweLO3Eg4';
+// ==================== DATA CONFIG ====================
+const PERSONAL_CONFIG_KEY = 'project_power_data';
+const THRESHOLD_CONFIG_KEY = 'project_power_thresholds';
 
-// Job-seeking stages (6 stages)
+// Default thresholds for job-seeking stages
+const DEFAULT_THRESHOLDS = {
+// 求职赛道 thresholds (index -> threshold)
+job: {
+    0: { threshold: 1, label: '完成即进入' },
+    1: { threshold: 1, label: '≥1人即进行中' },
+    2: { threshold: 10, label: '≥10次即已完成' },
+    3: { threshold: 20, label: '≥20家即已完成' },
+    4: { threshold: 1, label: '≥1次即进行中' },
+    5: { threshold: 1, label: '≥1次即进行中' },
+},
+// 找对象赛道 thresholds (index -> threshold)
+love: {
+    0: { threshold: 1, label: '完成即进入' },
+    1: { threshold: 3, label: '≥3种渠道即进行中' },
+    2: { threshold: 5, label: '≥5人即进行中' },
+    3: { threshold: 10, label: '≥10次即进行中' },
+    4: { threshold: 3, label: '≥3次即进行中' },
+    5: { threshold: 1, label: '完成即进入' },
+    6: { threshold: 1, label: '完成即进入' },
+}
+};
+
+// Job-seeking stages (6 stages as per PRD - actually 6 numbered, with stage 0 being resume writing with no number input)
 const JOB_STAGES = [
     { name: '撰写中英文简历', hasNumber: false, key: 'resume' },
     { name: '添加猎头联系方式', hasNumber: true, key: 'hunter', defaultThreshold: 5 },
@@ -126,306 +149,102 @@ const LOVE_STAGES = [
     { name: '确定恋爱关系', hasNumber: false, key: 'commit' },
 ];
 
-const DEFAULT_THRESHOLDS_MAP = {
-    0: 1, 1: 1, 2: 10, 3: 20, 4: 1, 5: 1
+const DEFAULT_DATA = {
+    persons: [
+        { id: 'xlh', name: '向龙一', track: '求职', startDate: new Date().toISOString().split('T')[0] },
+        { id: 'ztr', name: '赵陶然', track: '求职', startDate: new Date().toISOString().split('T')[0] },
+        { id: 'hq', name: '黄群', track: '找对象', startDate: new Date().toISOString().split('T')[0] },
+    ],
+    progresses: {}
 };
-const DEFAULT_LOVE_THRESHOLDS_MAP = {
-    0: 1, 1: 3, 2: 5, 3: 10, 4: 3, 5: 1, 6: 1
-};
-
-// Default initial data for new deployments
-const DEFAULT_PERSONS = [
-    { id: 'xlh', name: '向龙一', track: '求职' },
-    { id: 'ztr', name: '赵陶然', track: '求职' },
-    { id: 'hq', name: '黄群', track: '找对象' },
-];
 
 // ==================== STATE ====================
-let state = {
-    persons: [],
-    progresses: [],
-    thresholds: [],
-    currentPage: 'home',
-    currentPersonId: null,
-    loaded: false
-};
+let state = { data: null, currentPage: 'home', currentPersonId: null };
 
-// ==================== SUPABASE HELPERS ====================
-async function supabaseFetch(path, options = {}) {
-    const url = SUPABASE_URL + path;
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Prefer': 'return=representation',
-            ...(options.headers || {})
-        }
-    });
-    if (!res.ok) {
-        const errText = await res.text();
-        console.error('Supabase error:', res.status, errText);
-        throw new Error('Supabase error: ' + res.status);
+function loadData() {
+    const raw = localStorage.getItem(PERSONAL_CONFIG_KEY);
+    if (raw) {
+        try {
+            state.data = JSON.parse(raw);
+            return;
+        } catch(e) {}
     }
-    if (res.status === 204) return null;
-    return res.json();
+    state.data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    saveData();
 }
 
-// ==================== DATA OPERATIONS ====================
-async function loadPersons() {
-    try {
-        const data = await supabaseFetch('/rest/v1/persons?select=*&order=id.asc');
-        if (data && data.length > 0) {
-            state.persons = data.map(p => ({
-                id: p.id,
-                name: p.name,
-                track: p.track,
-                startDate: p.start_date
-            }));
-        } else {
-            // Initialize with default data
-            await initializeDefaultData();
-        }
-    } catch (e) {
-        console.error('Failed to load persons:', e);
-        try { await initializeDefaultData(); } catch(e2) {}
-    }
+function saveData() {
+    localStorage.setItem(PERSONAL_CONFIG_KEY, JSON.stringify(state.data));
 }
 
-async function loadProgresses() {
-    try {
-        state.progresses = await supabaseFetch('/rest/v1/progresses?select=*');
-    } catch (e) {
-        console.error('Failed to load progresses:', e);
-        state.progresses = [];
+function loadThresholds() {
+    const raw = localStorage.getItem(THRESHOLD_CONFIG_KEY);
+    if (raw) {
+        try { return JSON.parse(raw); } catch(e) {}
     }
+    return JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
 }
 
-async function loadThresholds() {
-    try {
-        state.thresholds = await supabaseFetch('/rest/v1/thresholds?select=*');
-    } catch (e) {
-        console.error('Failed to load thresholds:', e);
-        state.thresholds = [];
-    }
+function saveThresholds(thresholds) {
+    localStorage.setItem(THRESHOLD_CONFIG_KEY, JSON.stringify(thresholds));
 }
 
-async function initializeDefaultData() {
-    // Check if persons already exist
-    try {
-        const existing = await supabaseFetch('/rest/v1/persons?select=id&limit=1');
-        if (existing && existing.length > 0) return;
-    } catch(e) {}
-
-    const today = new Date().toISOString().split('T')[0];
-
-    // Insert default persons
-    for (const p of DEFAULT_PERSONS) {
-        await supabaseFetch('/rest/v1/persons', {
-            method: 'POST',
-            body: JSON.stringify({
-                id: p.id,
-                name: p.name,
-                track: p.track,
-                start_date: today
-            })
-        });
-    }
-
-    // Insert default thresholds (job)
-    for (const [idx, threshold] of Object.entries(DEFAULT_THRESHOLDS_MAP)) {
-        await supabaseFetch('/rest/v1/thresholds', {
-            method: 'POST',
-            body: JSON.stringify({
-                track: 'job',
-                stage_index: parseInt(idx),
-                threshold: threshold
-            })
-        });
-    }
-
-    // Insert default thresholds (love)
-    for (const [idx, threshold] of Object.entries(DEFAULT_LOVE_THRESHOLDS_MAP)) {
-        await supabaseFetch('/rest/v1/thresholds', {
-            method: 'POST',
-            body: JSON.stringify({
-                track: 'love',
-                stage_index: parseInt(idx),
-                threshold: threshold
-            })
-        });
-    }
-
-    // Reload
-    await loadPersons();
-    await loadThresholds();
-}
-
-async function upsertProgress(personId, stageIndex, value, status, manualStatus) {
-    const payload = {
-        person_id: personId,
-        stage_index: stageIndex,
-        value: value || 0,
-        status: status || '未开始',
-        manual_status: manualStatus || null
-    };
-
-    const existing = state.progresses.find(
-        p => p.person_id === personId && p.stage_index === stageIndex
-    );
-
-    if (existing) {
-        const qs = '?person_id=eq.' + personId + '&stage_index=eq.' + stageIndex;
-        await supabaseFetch('/rest/v1/progresses' + qs, {
-            method: 'PATCH',
-            body: JSON.stringify(payload)
-        });
-        Object.assign(existing, payload);
-    } else {
-        const result = await supabaseFetch('/rest/v1/progresses', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-        if (result) {
-            // Find and add to state
-            const newItem = Array.isArray(result) ? result[0] : result;
-            if (newItem) state.progresses.push(newItem);
-        }
-    }
-}
-
-async function upsertPerson(id, name, track, startDate) {
-    const existing = state.persons.find(p => p.id === id);
-    const payload = {
-        id: id,
-        name: name,
-        track: track,
-        start_date: startDate
-    };
-
-    if (existing) {
-        await supabaseFetch('/rest/v1/persons?id=eq.' + id, {
-            method: 'PATCH',
-            body: JSON.stringify(payload)
-        });
-        Object.assign(existing, payload);
-    } else {
-        const result = await supabaseFetch('/rest/v1/persons', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-        if (result) {
-            const newItem = Array.isArray(result) ? result[0] : result;
-            state.persons.push({
-                id: newItem.id,
-                name: newItem.name,
-                track: newItem.track,
-                startDate: newItem.start_date
-            });
-        }
-    }
-}
-
-async function deletePersonFromDB(personId) {
-    await supabaseFetch('/rest/v1/progresses?person_id=eq.' + personId, {
-        method: 'DELETE'
-    });
-    await supabaseFetch('/rest/v1/persons?id=eq.' + personId, {
-        method: 'DELETE'
-    });
-    state.persons = state.persons.filter(p => p.id !== personId);
-    state.progresses = state.progresses.filter(p => p.person_id !== personId);
-}
-
-async function upsertThreshold(track, stageIndex, threshold) {
-    const existing = state.thresholds.find(
-        t => t.track === track && t.stage_index === stageIndex
-    );
-
-    const payload = {
-        track: track,
-        stage_index: stageIndex,
-        threshold: threshold
-    };
-
-    if (existing) {
-        const qs = '?track=eq.' + track + '&stage_index=eq.' + stageIndex;
-        await supabaseFetch('/rest/v1/thresholds' + qs, {
-            method: 'PATCH',
-            body: JSON.stringify(payload)
-        });
-        existing.threshold = threshold;
-    } else {
-        const result = await supabaseFetch('/rest/v1/thresholds', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-        if (result) {
-            const newItem = Array.isArray(result) ? result[0] : result;
-            state.thresholds.push(newItem);
-        }
-    }
-}
-
-// ==================== COMPUTED HELPERS ====================
 function getStagesForTrack(track) {
     return track === '求职' ? JOB_STAGES : LOVE_STAGES;
 }
 
-function getThreshold(track, stageIndex) {
-    const trackKey = track === '求职' ? 'job' : 'love';
-    const th = state.thresholds.find(t => t.track === trackKey && t.stage_index === stageIndex);
-    if (th) return th.threshold;
-    if (trackKey === 'job') return DEFAULT_THRESHOLDS_MAP[stageIndex] || 1;
-    return DEFAULT_LOVE_THRESHOLDS_MAP[stageIndex] || 1;
-}
-
-function getProgressForPerson(personId, stageIndex) {
-    return state.progresses.find(p => p.person_id === personId && p.stage_index === stageIndex);
-}
-
-function getStageStatus(personId, stageIndex, stages) {
-    const prog = getProgressForPerson(personId, stageIndex);
-    if (!prog) return '未开始';
-
-    if (prog.manual_status) return prog.manual_status;
-
+function getStageStatus(personId, stageIndex, stages, thresholds) {
+    const p = state.data.progresses[personId];
+    if (!p || !p.stages) return '未开始';
+    const s = p.stages[stageIndex];
+    if (!s) return '未开始';
+    
+    // If manually set, respect it
+    if (s.manualStatus) return s.manualStatus;
+    
     const stage = stages[stageIndex];
+    // For non-number stages, just return saved status or default (no auto calc)
     if (!stage.hasNumber) {
-        return prog.status || '未开始';
+        return s.status || '未开始';
     }
-
-    const val = prog.value || 0;
+    
+    const val = s.value || 0;
     if (val === 0) return '未开始';
-
-    const person = state.persons.find(p => p.id === personId);
-    const thresholdVal = getThreshold(person?.track || '', stageIndex);
-
+    
+    const person = state.data.persons.find(pr => pr.id === personId);
+    const trackKey = person?.track === '求职' ? 'job' : 'love';
+    const th = thresholds[trackKey] && thresholds[trackKey][stageIndex];
+    const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
+    
+    // Rule: if threshold >= 10, reaching it means 已完成
     if (thresholdVal >= 10) {
         return val >= thresholdVal ? '已完成' : '进行中';
     }
+    // Rule: if threshold >= 5 but < 10, reaching it means 已完成  
     if (thresholdVal >= 5) {
         return val >= thresholdVal ? '已完成' : '进行中';
     }
+    // Rule: if threshold is 3, reaching it means 进行中 (not completed yet)
     if (thresholdVal === 3) {
         return val >= thresholdVal ? '进行中' : (val > 0 ? '进行中' : '未开始');
     }
+    // Rule: if threshold is 1, having any number means 进行中
     if (thresholdVal === 1) {
         return '进行中';
     }
+    
     return val > 0 ? '进行中' : '未开始';
 }
 
 function calculateProgress(personId) {
-    const person = state.persons.find(p => p.id === personId);
+    const person = state.data.persons.find(p => p.id === personId);
     if (!person) return { percent: 0, completed: 0, total: 0, status: '未开始' };
     const stages = getStagesForTrack(person.track);
+    const thresholds = loadThresholds();
     let completed = 0;
     let started = false;
     stages.forEach((_, idx) => {
-        const st = getStageStatus(personId, idx, stages);
+        const st = getStageStatus(personId, idx, stages, thresholds);
         if (st === '已完成') completed++;
         if (st !== '未开始') started = true;
     });
@@ -448,24 +267,27 @@ function calculateDays(startDateStr) {
 
 function isStageLocked(personId, stageIndex) {
     if (stageIndex === 0) return false;
-    const person = state.persons.find(p => p.id === personId);
+    const person = state.data.persons.find(p => p.id === personId);
     if (!person) return true;
     const stages = getStagesForTrack(person.track);
-    const prevStatus = getStageStatus(personId, stageIndex - 1, stages);
+    const thresholds = loadThresholds();
+    const prevStatus = getStageStatus(personId, stageIndex - 1, stages, thresholds);
     return prevStatus !== '已完成';
 }
 
-// ==================== RENDER ====================
+// ==================== COMPONENTS ====================
 function renderHome() {
-    const totalPersons = state.persons.length;
-    const completedPersons = state.persons.filter(p => calculateProgress(p.id).status === '已完成').length;
-    const inProgressPersons = state.persons.filter(p => calculateProgress(p.id).status === '进行中').length;
+    const data = state.data;
+    const totalPersons = data.persons.length;
+    const completedPersons = data.persons.filter(p => calculateProgress(p.id).status === '已完成').length;
+    const inProgressPersons = data.persons.filter(p => calculateProgress(p.id).status === '进行中').length;
 
     let html = `
         <div class="header">
             <h1>🚀 Project Power <span>· PMO进度管理</span></h1>
             <div class="header-actions">
                 <button class="btn btn-primary" onclick="showAddPerson()">➕ 新增人员</button>
+                <button class="btn btn-back" onclick="resetData()">🔄 重置</button>
             </div>
         </div>
         <div class="stats-bar">
@@ -477,7 +299,7 @@ function renderHome() {
         <div class="grid">
     `;
 
-    state.persons.forEach(p => {
+    data.persons.forEach(p => {
         const prog = calculateProgress(p.id);
         const days = calculateDays(p.startDate);
         html += `
@@ -502,7 +324,7 @@ function renderHome() {
         `;
     });
 
-    if (state.persons.length === 0) {
+    if (data.persons.length === 0) {
         html += `
             <div class="empty-state" style="grid-column:1/-1;">
                 <div class="icon">📋</div>
@@ -529,9 +351,10 @@ function goHome() {
 }
 
 function renderDetail(personId) {
-    const person = state.persons.find(p => p.id === personId);
+    const person = state.data.persons.find(p => p.id === personId);
     if (!person) { goHome(); return; }
     const stages = getStagesForTrack(person.track);
+    const thresholds = loadThresholds();
     const trackKey = person.track === '求职' ? 'job' : 'love';
     const prog = calculateProgress(personId);
     const days = calculateDays(person.startDate);
@@ -559,10 +382,10 @@ function renderDetail(personId) {
     `;
 
     stages.forEach((stage, idx) => {
-        const progData = getProgressForPerson(personId, idx);
-        const s = progData || { value: 0, status: '未开始', manual_status: null };
+        const p = state.data.progresses[personId] || { stages: {} };
+        const s = p.stages[idx] || { value: 0, status: '未开始', manualStatus: null };
         const locked = isStageLocked(personId, idx);
-        const currentStatus = getStageStatus(personId, idx, stages);
+        const currentStatus = getStageStatus(personId, idx, stages, thresholds);
         const stageClass = locked ? 'locked' : (currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : ''));
         const indexClass = currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : '');
 
@@ -580,7 +403,8 @@ function renderDetail(personId) {
 
         if (stage.hasNumber) {
             const val = s.value || 0;
-            const thresholdVal = getThreshold(person.track, idx);
+            const th = thresholds[trackKey] && thresholds[trackKey][idx];
+            const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
             html += `
                 <div>
                     <input type="number" min="0" value="${val}" ${locked ? 'disabled' : ''} 
@@ -590,7 +414,7 @@ function renderDetail(personId) {
                 </div>
             `;
         } else {
-            html += '<span style="color:#999;font-size:13px;">📌 固定完成类阶段</span>';
+            html += `<span style="color:#999;font-size:13px;">📌 固定完成类阶段</span>`;
         }
 
         html += `
@@ -618,39 +442,37 @@ function renderDetail(personId) {
 }
 
 // ==================== ACTIONS ====================
-async function updateStartDate(personId, date) {
-    const person = state.persons.find(p => p.id === personId);
+function updateStartDate(personId, date) {
+    const person = state.data.persons.find(p => p.id === personId);
     if (person) {
         person.startDate = date;
-        await upsertPerson(person.id, person.name, person.track, date);
+        saveData();
         renderDetail(personId);
     }
 }
 
-async function updateStageValue(personId, stageIndex, value) {
-    const val = parseInt(value) || 0;
-    const person = state.persons.find(p => p.id === personId);
-    if (!person) return;
-    const stages = getStagesForTrack(person.track);
-    const currentStatus = getStageStatus(personId, stageIndex, stages);
-    let status = currentStatus;
-    if (val === 0) status = '未开始';
-    else if (currentStatus === '未开始') status = '进行中';
-
-    await upsertProgress(personId, stageIndex, val, status, null);
-    await loadProgresses();
+function updateStageValue(personId, stageIndex, value) {
+    if (!state.data.progresses[personId]) {
+        state.data.progresses[personId] = { stages: {} };
+    }
+    const s = state.data.progresses[personId].stages;
+    if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
+    s[stageIndex].value = parseInt(value) || 0;
+    // Clear manual status when value changes
+    s[stageIndex].manualStatus = null;
+    saveData();
     renderDetail(personId);
 }
 
-async function updateStageStatus(personId, stageIndex, status) {
-    const person = state.persons.find(p => p.id === personId);
-    if (!person) return;
-    const stages = getStagesForTrack(person.track);
-    const progData = getProgressForPerson(personId, stageIndex);
-    const val = progData ? progData.value : 0;
-
-    await upsertProgress(personId, stageIndex, val, status, status);
-    await loadProgresses();
+function updateStageStatus(personId, stageIndex, status) {
+    if (!state.data.progresses[personId]) {
+        state.data.progresses[personId] = { stages: {} };
+    }
+    const s = state.data.progresses[personId].stages;
+    if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
+    s[stageIndex].manualStatus = status;
+    s[stageIndex].status = status;
+    saveData();
     renderDetail(personId);
 }
 
@@ -681,30 +503,43 @@ function showAddPerson() {
     setTimeout(() => document.getElementById('newPersonName').focus(), 100);
 }
 
-async function confirmAddPerson() {
+function confirmAddPerson() {
     const name = document.getElementById('newPersonName').value.trim();
     const track = document.getElementById('newPersonTrack').value;
     if (!name) { alert('请输入姓名'); return; }
     const id = 'p_' + Date.now();
-    const today = new Date().toISOString().split('T')[0];
-    await upsertPerson(id, name, track, today);
-    await loadPersons();
+    state.data.persons.push({ id, name, track, startDate: new Date().toISOString().split('T')[0] });
+    saveData();
     document.querySelector('.modal-overlay').remove();
     renderHome();
 }
 
-async function deletePerson(personId) {
+function deletePerson(personId) {
     if (!confirm('确定要删除该人员及其所有进度数据吗？')) return;
-    await deletePersonFromDB(personId);
+    state.data.persons = state.data.persons.filter(p => p.id !== personId);
+    delete state.data.progresses[personId];
+    saveData();
     goHome();
 }
 
+function resetData() {
+    if (!confirm('确定要重置所有数据吗？（将恢复到初始示例数据）')) return;
+    localStorage.removeItem(PERSONAL_CONFIG_KEY);
+    localStorage.removeItem(THRESHOLD_CONFIG_KEY);
+    loadData();
+    renderHome();
+}
+
 function showThresholdConfig(personId, stageIndex) {
-    const person = state.persons.find(p => p.id === personId);
+    const person = state.data.persons.find(p => p.id === personId);
     if (!person) return;
+    const trackKey = person.track === '求职' ? 'job' : 'love';
     const stages = getStagesForTrack(person.track);
     const stage = stages[stageIndex];
-    const current = getThreshold(person.track, stageIndex);
+    const thresholds = loadThresholds();
+    const current = (thresholds[trackKey] && thresholds[trackKey][stageIndex]) 
+        ? thresholds[trackKey][stageIndex].threshold 
+        : (stage.defaultThreshold || 1);
 
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
@@ -726,56 +561,24 @@ function showThresholdConfig(personId, stageIndex) {
     document.body.appendChild(overlay);
 }
 
-async function confirmThresholdConfig(personId, stageIndex) {
+function confirmThresholdConfig(personId, stageIndex) {
     const val = parseInt(document.getElementById('thresholdInput').value);
     if (!val || val < 1) { alert('请输入有效的阈值（≥1）'); return; }
-    const person = state.persons.find(p => p.id === personId);
+    const person = state.data.persons.find(p => p.id === personId);
     if (!person) return;
     const trackKey = person.track === '求职' ? 'job' : 'love';
-    await upsertThreshold(trackKey, stageIndex, val);
-    await loadThresholds();
+    const thresholds = loadThresholds();
+    if (!thresholds[trackKey]) thresholds[trackKey] = {};
+    if (!thresholds[trackKey][stageIndex]) thresholds[trackKey][stageIndex] = {};
+    thresholds[trackKey][stageIndex].threshold = val;
+    saveThresholds(thresholds);
     document.querySelector('.modal-overlay').remove();
     renderDetail(personId);
 }
 
-// ==================== REALTIME SYNC ====================
-let pollInterval = null;
-
-function startPolling() {
-    if (pollInterval) clearInterval(pollInterval);
-    pollInterval = setInterval(async () => {
-        if (document.hidden) return;
-        try {
-            await loadProgresses();
-            if (state.currentPage === 'home') {
-                await loadPersons();
-                renderHome();
-            } else if (state.currentPage === 'detail' && state.currentPersonId) {
-                const personStillExists = state.persons.find(p => p.id === state.currentPersonId);
-                if (personStillExists) {
-                    renderDetail(state.currentPersonId);
-                } else {
-                    goHome();
-                }
-            }
-        } catch(e) {
-            // Silent fail
-        }
-    }, 3000);
-}
-
 // ==================== INIT ====================
-async function init() {
-    await loadPersons();
-    await loadProgresses();
-    await loadThresholds();
-    state.loaded = true;
-    renderHome();
-    startPolling();
-}
-
-init();
-
+loadData();
+renderHome();
 </script>
 </body>
 </html>
