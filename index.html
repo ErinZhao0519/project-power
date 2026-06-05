@@ -226,12 +226,21 @@ async function loadData() {
 
 async function saveData() {
   for (const p of state.data.persons) {
-    const { error } = await supabase.from('persons').upsert({ id: p.id, name: p.name, track: p.track, start_date: p.startDate }, { onConflict: 'id' });
-    if (error) console.warn('saveData persons upsert:', error.message);
+    // Check if person exists first
+    const { data: existingPerson } = await supabase.from('persons').select('id').eq('id', p.id).maybeSingle();
+    if (existingPerson) {
+      await supabase.from('persons').update({ name: p.name, track: p.track, start_date: p.startDate }).eq('id', p.id);
+    } else {
+      await supabase.from('persons').insert({ id: p.id, name: p.name, track: p.track, start_date: p.startDate });
+    }
   }
   for (const [personId, prog] of Object.entries(state.data.progresses)) {
-    const { error } = await supabase.from('progresses').upsert({ person_id: personId, stages: prog.stages || {} }, { onConflict: 'person_id' });
-    if (error) console.warn('saveData progresses upsert:', error.message);
+    const { data: existingProg } = await supabase.from('progresses').select('person_id').eq('person_id', personId).maybeSingle();
+    if (existingProg) {
+      await supabase.from('progresses').update({ stages: prog.stages || {} }).eq('person_id', personId);
+    } else {
+      await supabase.from('progresses').insert({ person_id: personId, stages: prog.stages || {} });
+    }
   }
 }
 
@@ -242,7 +251,12 @@ async function loadThresholds() {
 }
 
 async function saveThresholds(thresholds) {
-  await supabase.from('thresholds').upsert({ id: 1, config: thresholds }, { onConflict: 'id' });
+  const { data: existing } = await supabase.from('thresholds').select('id').eq('id', 1).maybeSingle();
+  if (existing) {
+    await supabase.from('thresholds').update({ config: thresholds }).eq('id', 1);
+  } else {
+    await supabase.from('thresholds').insert({ id: 1, config: thresholds });
+  }
 }
 
 function getStagesForTrack(track) {
@@ -583,15 +597,13 @@ async function updateStageStatus(personId, stageIndex, status) {
   if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
   s[stageIndex].manualStatus = status;
   s[stageIndex].status = status;
-  // Save to supabase - upsert using person_id as pk
-  const { error } = await supabase
-    .from('progresses')
-    .upsert({ person_id: personId, stages: state.data.progresses[personId].stages }, { 
-      onConflict: 'person_id',
-      ignoreDuplicates: false 
-    });
-  if (error) console.error('Progress save error:', error);
-  // Always use in-memory state to render (skip DB reload to avoid stale data)
+  // Check if record exists, then update or insert
+  const { data: existing } = await supabase.from('progresses').select('person_id').eq('person_id', personId).maybeSingle();
+  if (existing) {
+    await supabase.from('progresses').update({ stages: state.data.progresses[personId].stages }).eq('person_id', personId);
+  } else {
+    await supabase.from('progresses').insert({ person_id: personId, stages: state.data.progresses[personId].stages });
+  }
   await renderDetail(personId, true);
 }
 
