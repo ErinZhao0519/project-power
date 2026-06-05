@@ -278,8 +278,8 @@ function getStagesForTrack(person) {
   if (person.track === '找对象') return LOVE_STAGES;
   // 自定义赛道：从 progresses 中读取 stage_defs
   const p = state.data.progresses[person.id];
-  if (p && p.stages && p.stages.stage_defs) return p.stages.stage_defs;
-  return [];
+  if (p && p.stages && p.stages.stage_defs && p.stages.stage_defs.length > 0) return p.stages.stage_defs;
+  return [{ name: '尚未定义阶段', hasNumber: false, key: 'placeholder' }];
 }
 
 async function getStageStatus(personId, stageIndex, stages, thresholds) {
@@ -937,7 +937,7 @@ async function showThresholdConfig(personId, stageIndex) {
   const person = state.data.persons.find(p => p.id === personId);
   if (!person) return;
   const trackKey = person.track === '求职' ? 'job' : 'love';
-  const stages = getStagesForTrack(person.track);
+  const stages = getStagesForTrack(person);
   const stage = stages[stageIndex];
   const thresholds = await loadThresholds();
   const current = (thresholds[trackKey] && thresholds[trackKey][stageIndex])
