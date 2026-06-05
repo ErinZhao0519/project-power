@@ -146,12 +146,12 @@
 </head>
 <body>
 <div class="app" id="app"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script>
 // ==================== SUPABASE CONFIG ====================
 const SUPABASE_URL = 'https://hikmgzhhoyenptmmljgx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpa21nemhob3llbnB0bW1samd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjE5NzYsImV4cCI6MjA5NjE5Nzk3Nn0.1nOVokhJ9gDDEiJ3Ojt6Zah80wxf83NmWEoweLO3Eg4';
-const { createClient } = supabase;
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ==================== DATA CONFIG ====================
 const DEFAULT_THRESHOLDS = {
