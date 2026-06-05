@@ -203,9 +203,8 @@ async function ensurePersonsTable() {
 
 async function loadData() {
   const { data, error } = await supabase.from('persons').select('*');
-  if (error) { console.error('loadData error:', error); return; }
+  if (error) { console.error('loadData error:', error); state.data = { persons: [], progresses: {} }; return; }
   if (!data || data.length === 0) {
-    // Insert default data
     const defaults = [
       { id: 'xlh', name: '向龙一', track: '求职', start_date: new Date().toISOString().split('T')[0] },
       { id: 'ztr', name: '赵陶然', track: '求职', start_date: new Date().toISOString().split('T')[0] },
@@ -217,28 +216,27 @@ async function loadData() {
     return;
   }
   const persons = data.map(r => ({ id: r.id, name: r.name, track: r.track, startDate: r.start_date }));
-  // Load progresses
   const { data: progData, error: progErr } = await supabase.from('progresses').select('*');
   const progresses = {};
   if (!progErr && progData) {
-    progData.forEach(r => { progresses[r.person_id] = { stages: r.stages }; });
+    progData.forEach(r => { progresses[r.person_id] = { stages: r.stages || {} }; });
   }
   state.data = { persons, progresses };
 }
 
 async function saveData() {
-  // Save persons
   for (const p of state.data.persons) {
-    await supabase.from('persons').upsert({ id: p.id, name: p.name, track: p.track, start_date: p.startDate }, { onConflict: 'id' });
+    const { error } = await supabase.from('persons').upsert({ id: p.id, name: p.name, track: p.track, start_date: p.startDate }, { onConflict: 'id' });
+    if (error) console.warn('saveData persons upsert:', error.message);
   }
-  // Save progresses
   for (const [personId, prog] of Object.entries(state.data.progresses)) {
-    await supabase.from('progresses').upsert({ person_id: personId, stages: prog.stages }, { onConflict: 'person_id' });
+    const { error } = await supabase.from('progresses').upsert({ person_id: personId, stages: prog.stages || {} }, { onConflict: 'person_id' });
+    if (error) console.warn('saveData progresses upsert:', error.message);
   }
 }
 
 async function loadThresholds() {
-  const { data, error } = await supabase.from('thresholds').select('*').single();
+  const { data, error } = await supabase.from('thresholds').select('*').maybeSingle();
   if (error || !data) return JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
   return data.config;
 }
