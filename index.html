@@ -91,6 +91,52 @@
         .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
         .date-input { padding: 6px 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 13px; outline: none; }
         .date-input:focus { border-color: #667eea; }
+        /* ==================== 阶段日志与评论样式 ==================== */
+        .stage-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 16px; border-top: 1px solid #f0f0f0; padding-top: 16px; }
+        .stage-details > div { padding: 0 8px; }
+        .stage-details .left-col { border-right: 1px solid #f0f0f0; padding-right: 16px; }
+        .stage-details .right-col { padding-left: 16px; }
+        .col-header { font-size: 14px; font-weight: 600; color: #666; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .col-header .count { font-size: 11px; color: #bbb; font-weight: 400; margin-left: auto; }
+        .add-btn-small { background: none; border: 1px dashed #ccc; border-radius: 8px; padding: 4px 12px; font-size: 12px; color: #999; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .add-btn-small:hover { border-color: #667eea; color: #667eea; background: #f8f9ff; }
+        .log-item, .comment-item { background: #f8f9fc; border-radius: 10px; padding: 12px; margin-bottom: 8px; position: relative; }
+        .log-item:hover, .comment-item:hover { background: #f0f2f8; }
+        .log-meta, .comment-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+        .log-time { font-size: 11px; color: #bbb; }
+        .log-mood { font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: 500; display: inline-block; }
+        .log-mood.mood-积极 { background: #f6ffed; color: #52c41a; }
+        .log-mood.mood-一般 { background: #fffbe6; color: #d48806; }
+        .log-mood.mood-消极 { background: #fff2f0; color: #ff4d4f; }
+        .log-mood.mood-其他 { background: #f0f5ff; color: #2f54eb; }
+        .log-content { font-size: 13px; line-height: 1.6; color: #444; white-space: pre-wrap; word-break: break-word; }
+        .log-actions, .comment-actions { position: absolute; top: 6px; right: 6px; display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+        .log-item:hover .log-actions, .comment-item:hover .comment-actions, .reply-item:hover .comment-actions { opacity: 1; }
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 12px; color: #bbb; padding: 2px 5px; border-radius: 4px; line-height: 1; }
+        .action-btn:hover { background: #e8e8e8; color: #333; }
+        .comment-avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; flex-shrink: 0; }
+        .comment-author { font-size: 13px; font-weight: 500; color: #333; }
+        .comment-reaction { font-size: 11px; padding: 1px 8px; border-radius: 8px; background: #f0f5ff; color: #2f54eb; display: inline-block; }
+        .comment-text { font-size: 13px; line-height: 1.6; color: #444; margin-top: 4px; white-space: pre-wrap; word-break: break-word; }
+        .reply-toggle { background: none; border: none; color: #667eea; font-size: 12px; cursor: pointer; padding: 2px 0; margin-top: 4px; }
+        .reply-toggle:hover { text-decoration: underline; }
+        .replies { margin-left: 24px; margin-top: 8px; padding-left: 12px; border-left: 2px solid #e8e8e8; }
+        .reply-item { background: #f8f9fc; border-radius: 8px; padding: 10px; margin-bottom: 6px; position: relative; }
+        .reply-item:hover { background: #f0f2f8; }
+        .inline-edit-box { width: 100%; padding: 6px 8px; border: 2px solid #667eea; border-radius: 8px; font-size: 13px; outline: none; resize: vertical; min-height: 36px; font-family: inherit; box-sizing: border-box; }
+        .inline-edit-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .inline-edit-row button { padding: 4px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; }
+        .inline-edit-row .save-btn { background: #667eea; color: white; }
+        .inline-edit-row .save-btn:hover { background: #5a6fd6; }
+        .inline-edit-row .cancel-btn { background: #f0f0f0; color: #666; }
+        .inline-edit-row .cancel-btn:hover { background: #e0e0e0; }
+        .small-select { padding: 3px 6px; border: 2px solid #667eea; border-radius: 6px; font-size: 12px; outline: none; background: white; }
+        .small-input { padding: 3px 8px; border: 2px solid #667eea; border-radius: 6px; font-size: 12px; outline: none; width: 120px; }
+        .add-log-form, .add-comment-form { background: #f8f9fc; border-radius: 10px; padding: 12px; margin-bottom: 8px; border: 1px solid #e8e8e8; }
+        .add-log-form textarea, .add-comment-form textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; resize: vertical; min-height: 50px; font-family: inherit; outline: none; box-sizing: border-box; }
+        .add-log-form textarea:focus, .add-comment-form textarea:focus { border-color: #667eea; }
+        .no-data-tip { text-align: center; padding: 16px; color: #ccc; font-size: 13px; }
+        .reply-form { margin-left: 24px; margin-top: 6px; padding: 10px; background: #f8f9fc; border-radius: 8px; border: 1px solid #e8e8e8; }
         @media (max-width: 768px) {
             .header { flex-direction: column; gap: 12px; text-align: center; padding: 20px; }
             .grid { grid-template-columns: 1fr; }
@@ -100,14 +146,15 @@
 </head>
 <body>
 <div class="app" id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ==================== DATA CONFIG ====================
-const PERSONAL_CONFIG_KEY = 'project_power_data';
-const THRESHOLD_CONFIG_KEY = 'project_power_thresholds';
+// ==================== SUPABASE CONFIG ====================
+const SUPABASE_URL = 'https://hikmgzhhoyenptmmljgx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpa21nemhob3llbnB0bW1samd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjE5NzYsImV4cCI6MjA5NjE5Nzk3Nn0.1nOVokhJ9gDDEiJ3Ojt6Zah80wxf83NmWEoweLO3Eg4';
+const { createClient } = supabase;
 
-// Default thresholds for job-seeking stages
+// ==================== DATA CONFIG ====================
 const DEFAULT_THRESHOLDS = {
-// 求职赛道 thresholds (index -> threshold)
 job: {
     0: { threshold: 1, label: '完成即进入' },
     1: { threshold: 1, label: '≥1人即进行中' },
@@ -115,9 +162,8 @@ job: {
     3: { threshold: 20, label: '≥20家即已完成' },
     4: { threshold: 1, label: '≥1次即进行中' },
     5: { threshold: 1, label: '≥1次即进行中' },
-},
-// 找对象赛道 thresholds (index -> threshold)
-love: {
+  },
+  love: {
     0: { threshold: 1, label: '完成即进入' },
     1: { threshold: 3, label: '≥3种渠道即进行中' },
     2: { threshold: 5, label: '≥5人即进行中' },
@@ -128,456 +174,797 @@ love: {
 }
 };
 
-// Job-seeking stages (6 stages as per PRD - actually 6 numbered, with stage 0 being resume writing with no number input)
 const JOB_STAGES = [
-    { name: '撰写中英文简历', hasNumber: false, key: 'resume' },
-    { name: '添加猎头联系方式', hasNumber: true, key: 'hunter', defaultThreshold: 5 },
-    { name: '与猎头/友人沟通工作机会', hasNumber: true, key: 'communicate', defaultThreshold: 10 },
-    { name: '向公司投出简历', hasNumber: true, key: 'apply', defaultThreshold: 20 },
-    { name: '公司一轮面试', hasNumber: true, key: 'interview1', defaultThreshold: 1 },
-    { name: '公司二轮及终面面试', hasNumber: true, key: 'interview2', defaultThreshold: 1 },
+  { name: '撰写中英文简历', hasNumber: false, key: 'resume' },
+  { name: '添加猎头联系方式', hasNumber: true, key: 'hunter', defaultThreshold: 5 },
+  { name: '与猎头/友人沟通工作机会', hasNumber: true, key: 'communicate', defaultThreshold: 10 },
+  { name: '向公司投出简历', hasNumber: true, key: 'apply', defaultThreshold: 20 },
+  { name: '公司一轮面试', hasNumber: true, key: 'interview1', defaultThreshold: 1 },
+  { name: '公司二轮及终面面试', hasNumber: true, key: 'interview2', defaultThreshold: 1 },
 ];
 
-// Love-seeking stages (7 stages)
 const LOVE_STAGES = [
-    { name: '个人形象优化', hasNumber: false, key: 'appearance' },
-    { name: '拓展社交渠道', hasNumber: true, key: 'social', defaultThreshold: 3 },
-    { name: '新增异性联系人', hasNumber: true, key: 'contacts', defaultThreshold: 5 },
-    { name: '日常沟通互动', hasNumber: true, key: 'chat', defaultThreshold: 10 },
-    { name: '线下见面约会', hasNumber: true, key: 'date', defaultThreshold: 3 },
-    { name: '深度相处磨合', hasNumber: false, key: 'deepen' },
-    { name: '确定恋爱关系', hasNumber: false, key: 'commit' },
+  { name: '个人形象优化', hasNumber: false, key: 'appearance' },
+  { name: '拓展社交渠道', hasNumber: true, key: 'social', defaultThreshold: 3 },
+  { name: '新增异性联系人', hasNumber: true, key: 'contacts', defaultThreshold: 5 },
+  { name: '日常沟通互动', hasNumber: true, key: 'chat', defaultThreshold: 10 },
+  { name: '线下见面约会', hasNumber: true, key: 'date', defaultThreshold: 3 },
+  { name: '深度相处磨合', hasNumber: false, key: 'deepen' },
+  { name: '确定恋爱关系', hasNumber: false, key: 'commit' },
 ];
 
-const DEFAULT_DATA = {
-    persons: [
-        { id: 'xlh', name: '向龙一', track: '求职', startDate: new Date().toISOString().split('T')[0] },
-        { id: 'ztr', name: '赵陶然', track: '求职', startDate: new Date().toISOString().split('T')[0] },
-        { id: 'hq', name: '黄群', track: '找对象', startDate: new Date().toISOString().split('T')[0] },
-    ],
-    progresses: {}
-};
+// ==================== SUPABASE HELPERS ====================
+let state = { currentPage: 'home', currentPersonId: null };
 
-// ==================== STATE ====================
-let state = { data: null, currentPage: 'home', currentPersonId: null };
-
-function loadData() {
-    const raw = localStorage.getItem(PERSONAL_CONFIG_KEY);
-    if (raw) {
-        try {
-            state.data = JSON.parse(raw);
-            return;
-        } catch(e) {}
-    }
-    state.data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-    saveData();
+async function ensurePersonsTable() {
+  const { error } = await supabase.rpc('create_persons_table_if_not_exists');
+  if (error) console.warn('Table check rpc not available, will use insert with upsert');
 }
 
-function saveData() {
-    localStorage.setItem(PERSONAL_CONFIG_KEY, JSON.stringify(state.data));
+async function loadData() {
+  const { data, error } = await supabase.from('persons').select('*');
+  if (error) { console.error('loadData error:', error); return; }
+  if (!data || data.length === 0) {
+    // Insert default data
+    const defaults = [
+      { id: 'xlh', name: '向龙一', track: '求职', start_date: new Date().toISOString().split('T')[0] },
+      { id: 'ztr', name: '赵陶然', track: '求职', start_date: new Date().toISOString().split('T')[0] },
+      { id: 'hq', name: '黄群', track: '找对象', start_date: new Date().toISOString().split('T')[0] },
+    ];
+    const { error: insErr } = await supabase.from('persons').insert(defaults);
+    if (insErr) console.error('Insert defaults error:', insErr);
+    state.data = { persons: defaults, progresses: {} };
+    return;
+  }
+  const persons = data.map(r => ({ id: r.id, name: r.name, track: r.track, startDate: r.start_date }));
+  // Load progresses
+  const { data: progData, error: progErr } = await supabase.from('progresses').select('*');
+  const progresses = {};
+  if (!progErr && progData) {
+    progData.forEach(r => { progresses[r.person_id] = { stages: r.stages }; });
+  }
+  state.data = { persons, progresses };
 }
 
-function loadThresholds() {
-    const raw = localStorage.getItem(THRESHOLD_CONFIG_KEY);
-    if (raw) {
-        try { return JSON.parse(raw); } catch(e) {}
-    }
-    return JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
+async function saveData() {
+  // Save persons
+  for (const p of state.data.persons) {
+    await supabase.from('persons').upsert({ id: p.id, name: p.name, track: p.track, start_date: p.startDate }, { onConflict: 'id' });
+  }
+  // Save progresses
+  for (const [personId, prog] of Object.entries(state.data.progresses)) {
+    await supabase.from('progresses').upsert({ person_id: personId, stages: prog.stages }, { onConflict: 'person_id' });
+  }
 }
 
-function saveThresholds(thresholds) {
-    localStorage.setItem(THRESHOLD_CONFIG_KEY, JSON.stringify(thresholds));
+async function loadThresholds() {
+  const { data, error } = await supabase.from('thresholds').select('*').single();
+  if (error || !data) return JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
+  return data.config;
+}
+
+async function saveThresholds(thresholds) {
+  await supabase.from('thresholds').upsert({ id: 1, config: thresholds }, { onConflict: 'id' });
 }
 
 function getStagesForTrack(track) {
     return track === '求职' ? JOB_STAGES : LOVE_STAGES;
 }
 
-function getStageStatus(personId, stageIndex, stages, thresholds) {
-    const p = state.data.progresses[personId];
-    if (!p || !p.stages) return '未开始';
-    const s = p.stages[stageIndex];
-    if (!s) return '未开始';
-    
-    // If manually set, respect it
-    if (s.manualStatus) return s.manualStatus;
-    
-    const stage = stages[stageIndex];
-    // For non-number stages, just return saved status or default (no auto calc)
-    if (!stage.hasNumber) {
-        return s.status || '未开始';
-    }
-    
-    const val = s.value || 0;
-    if (val === 0) return '未开始';
-    
-    const person = state.data.persons.find(pr => pr.id === personId);
-    const trackKey = person?.track === '求职' ? 'job' : 'love';
-    const th = thresholds[trackKey] && thresholds[trackKey][stageIndex];
-    const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
-    
-    // Rule: if threshold >= 10, reaching it means 已完成
-    if (thresholdVal >= 10) {
-        return val >= thresholdVal ? '已完成' : '进行中';
-    }
-    // Rule: if threshold >= 5 but < 10, reaching it means 已完成  
-    if (thresholdVal >= 5) {
-        return val >= thresholdVal ? '已完成' : '进行中';
-    }
-    // Rule: if threshold is 3, reaching it means 进行中 (not completed yet)
-    if (thresholdVal === 3) {
-        return val >= thresholdVal ? '进行中' : (val > 0 ? '进行中' : '未开始');
-    }
-    // Rule: if threshold is 1, having any number means 进行中
-    if (thresholdVal === 1) {
-        return '进行中';
-    }
-    
-    return val > 0 ? '进行中' : '未开始';
+async function getStageStatus(personId, stageIndex, stages, thresholds) {
+  const p = state.data.progresses[personId];
+  if (!p || !p.stages) return '未开始';
+  const s = p.stages[stageIndex];
+  if (!s) return '未开始';
+  if (s.manualStatus) return s.manualStatus;
+  const stage = stages[stageIndex];
+  if (!stage.hasNumber) return s.status || '未开始';
+  const val = s.value || 0;
+  if (val === 0) return '未开始';
+  const person = state.data.persons.find(pr => pr.id === personId);
+  const trackKey = person?.track === '求职' ? 'job' : 'love';
+  const th = thresholds[trackKey] && thresholds[trackKey][stageIndex];
+  const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
+  if (thresholdVal >= 10) return val >= thresholdVal ? '已完成' : '进行中';
+  if (thresholdVal >= 5) return val >= thresholdVal ? '已完成' : '进行中';
+  if (thresholdVal === 3) return val >= thresholdVal ? '进行中' : (val > 0 ? '进行中' : '未开始');
+  if (thresholdVal === 1) return '进行中';
+  return val > 0 ? '进行中' : '未开始';
 }
 
-function calculateProgress(personId) {
-    const person = state.data.persons.find(p => p.id === personId);
-    if (!person) return { percent: 0, completed: 0, total: 0, status: '未开始' };
-    const stages = getStagesForTrack(person.track);
-    const thresholds = loadThresholds();
-    let completed = 0;
-    let started = false;
-    stages.forEach((_, idx) => {
-        const st = getStageStatus(personId, idx, stages, thresholds);
-        if (st === '已完成') completed++;
-        if (st !== '未开始') started = true;
-    });
-    const total = stages.length;
-    const percent = total > 0 ? Math.round((completed / total) * 1000) / 10 : 0;
-    const percentDisplay = percent.toFixed(1);
-    let status = '未开始';
-    if (completed === total) status = '已完成';
-    else if (started) status = '进行中';
-    return { percent, percentDisplay, completed, total, status };
+async function calculateProgress(personId) {
+  const person = state.data.persons.find(p => p.id === personId);
+  if (!person) return { percent: 0, completed: 0, total: 0, status: '未开始' };
+  const stages = getStagesForTrack(person.track);
+  const thresholds = await loadThresholds();
+  let completed = 0, started = false;
+  for (let idx = 0; idx < stages.length; idx++) {
+    const st = await getStageStatus(personId, idx, stages, thresholds);
+    if (st === '已完成') completed++;
+    if (st !== '未开始') started = true;
+  }
+  const total = stages.length;
+  const percent = total > 0 ? Math.round((completed / total) * 1000) / 10 : 0;
+  let status = '未开始';
+  if (completed === total) status = '已完成';
+  else if (started) status = '进行中';
+  return { percent, percentDisplay: percent.toFixed(1), completed, total, status };
 }
 
 function calculateDays(startDateStr) {
-    if (!startDateStr) return 0;
-    const start = new Date(startDateStr);
-    const now = new Date();
-    const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-    return Math.max(0, diff);
+  if (!startDateStr) return 0;
+  const start = new Date(startDateStr);
+  const now = new Date();
+  return Math.max(0, Math.floor((now - start) / (1000 * 60 * 60 * 24)));
 }
 
-function isStageLocked(personId, stageIndex) {
-    if (stageIndex === 0) return false;
-    const person = state.data.persons.find(p => p.id === personId);
-    if (!person) return true;
-    const stages = getStagesForTrack(person.track);
-    const thresholds = loadThresholds();
-    const prevStatus = getStageStatus(personId, stageIndex - 1, stages, thresholds);
-    return prevStatus !== '已完成';
+async function isStageLocked(personId, stageIndex) {
+  if (stageIndex === 0) return false;
+  const person = state.data.persons.find(p => p.id === personId);
+  if (!person) return true;
+  const stages = getStagesForTrack(person.track);
+  const thresholds = await loadThresholds();
+  const prevStatus = await getStageStatus(personId, stageIndex - 1, stages, thresholds);
+  return prevStatus !== '已完成';
+}
+
+// ==================== LOG & COMMENT HELPERS ====================
+async function loadLogs(personId, stageIndex) {
+  const { data, error } = await supabase.from('logs')
+    .select('*')
+    .eq('person_id', personId)
+    .eq('stage_index', stageIndex)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('loadLogs error:', error); return []; }
+  return data || [];
+}
+
+async function saveLog(personId, stageIndex, content, mood) {
+  const { error } = await supabase.from('logs').insert({
+    person_id: personId,
+    stage_index: stageIndex,
+    content,
+    mood: mood || '一般'
+  });
+  if (error) console.error('saveLog error:', error);
+}
+
+async function updateLog(logId, content, mood) {
+  const { error } = await supabase.from('logs').update({ content, mood }).eq('id', logId);
+  if (error) console.error('updateLog error:', error);
+}
+
+async function deleteLog(logId) {
+  const { error } = await supabase.from('logs').delete().eq('id', logId);
+  if (error) console.error('deleteLog error:', error);
+}
+
+async function loadComments(personId, stageIndex) {
+  const { data, error } = await supabase.from('comments')
+    .select('*')
+    .eq('person_id', personId)
+    .eq('stage_index', stageIndex)
+    .order('created_at', { ascending: true });
+  if (error) { console.error('loadComments error:', error); return []; }
+  return data || [];
+}
+
+async function saveComment(personId, stageIndex, content, parentId) {
+  const { error } = await supabase.from('comments').insert({
+    person_id: personId,
+    stage_index: stageIndex,
+    content,
+    parent_id: parentId || null
+  });
+  if (error) console.error('saveComment error:', error);
+}
+
+async function updateComment(commentId, content) {
+  const { error } = await supabase.from('comments').update({ content }).eq('id', commentId);
+  if (error) console.error('updateComment error:', error);
+}
+
+async function deleteComment(commentId) {
+  const { error } = await supabase.from('comments').delete().eq('id', commentId);
+  if (error) console.error('deleteComment error:', error);
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
 // ==================== COMPONENTS ====================
-function renderHome() {
-    const data = state.data;
-    const totalPersons = data.persons.length;
-    const completedPersons = data.persons.filter(p => calculateProgress(p.id).status === '已完成').length;
-    const inProgressPersons = data.persons.filter(p => calculateProgress(p.id).status === '进行中').length;
+async function renderHome() {
+  await loadData();
+  const data = state.data;
+  const totalPersons = data.persons.length;
+  let completedPersons = 0, inProgressPersons = 0;
+  for (const p of data.persons) {
+    const prog = await calculateProgress(p.id);
+    if (prog.status === '已完成') completedPersons++;
+    else if (prog.status === '进行中') inProgressPersons++;
+  }
 
-    let html = `
-        <div class="header">
-            <h1>🚀 Project Power <span>· PMO进度管理</span></h1>
-            <div class="header-actions">
-                <button class="btn btn-primary" onclick="showAddPerson()">➕ 新增人员</button>
-                <button class="btn btn-back" onclick="resetData()">🔄 重置</button>
-            </div>
+  let html = `
+    <div class="header">
+      <h1>🚀 Project Power <span>· PMO进度管理</span></h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="showAddPerson()">➕ 新增人员</button>
+        <button class="btn btn-back" onclick="resetData()">🔄 重置</button>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-card"><div class="num">${totalPersons}</div><div class="label">总人数</div></div>
+      <div class="stat-card"><div class="num">${inProgressPersons}</div><div class="label">进行中</div></div>
+      <div class="stat-card"><div class="num">${completedPersons}</div><div class="label">已完成</div></div>
+      <div class="stat-card"><div class="num">${totalPersons > 0 ? Math.round(completedPersons/totalPersons*100) : 0}%</div><div class="label">整体完成率</div></div>
+    </div>
+    <div class="grid">
+  `;
+
+  for (const p of data.persons) {
+    const prog = await calculateProgress(p.id);
+    const days = calculateDays(p.startDate);
+    html += `
+      <div class="card ${p.track}" onclick="goToDetail('${p.id}')">
+        <div class="card-header">
+          <span class="card-name">${p.name}</span>
+          <span class="tag ${p.track}">${p.track}</span>
         </div>
-        <div class="stats-bar">
-            <div class="stat-card"><div class="num">${totalPersons}</div><div class="label">总人数</div></div>
-            <div class="stat-card"><div class="num">${inProgressPersons}</div><div class="label">进行中</div></div>
-            <div class="stat-card"><div class="num">${completedPersons}</div><div class="label">已完成</div></div>
-            <div class="stat-card"><div class="num">${totalPersons > 0 ? Math.round(completedPersons/totalPersons*100) : 0}%</div><div class="label">整体完成率</div></div>
+        <div class="card-body">
+          <div class="card-item"><div class="value">${days}</div><div class="label">累计天数</div></div>
+          <div class="card-item"><div class="value">${prog.percentDisplay}%</div><div class="label">进度</div></div>
+          <div class="card-item"><div class="value">${prog.completed}/${prog.total}</div><div class="label">阶段完成</div></div>
+          <div class="card-item"><span class="status-badge ${prog.status}">${prog.status}</span></div>
         </div>
-        <div class="grid">
+        <div class="progress-bar"><div class="fill" style="width:${prog.percent}%"></div></div>
+        <div class="card-footer">
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();goToDetail('${p.id}')">📋 进入详情编辑</button>
+        </div>
+      </div>
     `;
+  }
 
-    data.persons.forEach(p => {
-        const prog = calculateProgress(p.id);
-        const days = calculateDays(p.startDate);
-        html += `
-            <div class="card ${p.track}" onclick="goToDetail('${p.id}')">
-                <div class="card-header">
-                    <span class="card-name">${p.name}</span>
-                    <span class="tag ${p.track}">${p.track}</span>
-                </div>
-                <div class="card-body">
-                    <div class="card-item"><div class="value">${days}</div><div class="label">累计天数</div></div>
-                    <div class="card-item"><div class="value">${prog.percentDisplay}%</div><div class="label">进度</div></div>
-                    <div class="card-item"><div class="value">${prog.completed}/${prog.total}</div><div class="label">阶段完成</div></div>
-                    <div class="card-item">
-                        <span class="status-badge ${prog.status}">${prog.status}</span>
-                    </div>
-                </div>
-                <div class="progress-bar"><div class="fill" style="width:${prog.percent}%"></div></div>
-                <div class="card-footer">
-                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();goToDetail('${p.id}')">📋 进入详情编辑</button>
-                </div>
-            </div>
-        `;
-    });
+  if (data.persons.length === 0) {
+    html += `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">📋</div><h3>暂无人员数据</h3><p style="margin-top:8px;color:#bbb;">点击右上角「新增人员」开始使用</p></div>`;
+  }
 
-    if (data.persons.length === 0) {
-        html += `
-            <div class="empty-state" style="grid-column:1/-1;">
-                <div class="icon">📋</div>
-                <h3>暂无人员数据</h3>
-                <p style="margin-top:8px;color:#bbb;">点击右上角「新增人员」开始使用</p>
-            </div>
-        `;
-    }
-
-    html += '</div>';
-    document.getElementById('app').innerHTML = html;
+  html += '</div>';
+  document.getElementById('app').innerHTML = html;
 }
 
 function goToDetail(personId) {
-    state.currentPage = 'detail';
-    state.currentPersonId = personId;
-    renderDetail(personId);
+  state.currentPage = 'detail';
+  state.currentPersonId = personId;
+  renderDetail(personId);
 }
 
 function goHome() {
-    state.currentPage = 'home';
-    state.currentPersonId = null;
-    renderHome();
+  state.currentPage = 'home';
+  state.currentPersonId = null;
+  renderHome();
 }
 
-function renderDetail(personId) {
-    const person = state.data.persons.find(p => p.id === personId);
-    if (!person) { goHome(); return; }
-    const stages = getStagesForTrack(person.track);
-    const thresholds = loadThresholds();
-    const trackKey = person.track === '求职' ? 'job' : 'love';
-    const prog = calculateProgress(personId);
-    const days = calculateDays(person.startDate);
+async function renderDetail(personId) {
+  await loadData();
+  const person = state.data.persons.find(p => p.id === personId);
+  if (!person) { goHome(); return; }
+  const stages = getStagesForTrack(person.track);
+  const thresholds = await loadThresholds();
+  const trackKey = person.track === '求职' ? 'job' : 'love';
+  const prog = await calculateProgress(personId);
+  const days = calculateDays(person.startDate);
 
-    let html = `
-        <div class="detail-page">
-            <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
-                <button class="btn btn-primary" onclick="goHome()" style="background:rgba(255,255,255,0.9);color:#667eea;font-weight:600;">← 返回总览</button>
-                <button class="btn btn-danger btn-sm" onclick="deletePerson('${personId}')" style="margin-left:auto;">🗑 删除人员</button>
-            </div>
-            <div class="person-header">
-                <h2>${person.name} <span class="tag ${person.track}">${person.track}</span></h2>
-                <div class="meta">
-                    <div class="item">📅 累计天数：<span class="num">${days}</span> 天</div>
-                    <div class="item">📊 进度：<span class="num">${prog.percentDisplay}%</span> (${prog.completed}/${prog.total})</div>
-                    <div class="item">状态：<span class="status-badge ${prog.status}">${prog.status}</span></div>
-                    <div class="item">
-                        <label style="font-size:13px;color:#999;">起始日期：</label>
-                        <input type="date" class="date-input" value="${person.startDate}" onchange="updateStartDate('${personId}', this.value)">
-                    </div>
-                </div>
-                <div class="progress-bar" style="margin-top:16px;"><div class="fill" style="width:${prog.percent}%"></div></div>
-            </div>
-            <div class="stages">
-    `;
+  let html = `
+    <div class="detail-page">
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-primary" onclick="goHome()" style="background:rgba(255,255,255,0.9);color:#667eea;font-weight:600;">← 返回总览</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePerson('${personId}')" style="margin-left:auto;">🗑 删除人员</button>
+      </div>
+      <div class="person-header">
+        <h2>${person.name} <span class="tag ${person.track}">${person.track}</span></h2>
+        <div class="meta">
+          <div class="item">📅 累计天数：<span class="num">${days}</span> 天</div>
+          <div class="item">📊 进度：<span class="num">${prog.percentDisplay}%</span> (${prog.completed}/${prog.total})</div>
+          <div class="item">状态：<span class="status-badge ${prog.status}">${prog.status}</span></div>
+          <div class="item">
+            <label style="font-size:13px;color:#999;">起始日期：</label>
+            <input type="date" class="date-input" value="${person.startDate}" onchange="updateStartDate('${personId}', this.value)">
+          </div>
+        </div>
+        <div class="progress-bar" style="margin-top:16px;"><div class="fill" style="width:${prog.percent}%"></div></div>
+      </div>
+      <div class="stages">
+  `;
 
-    stages.forEach((stage, idx) => {
-        const p = state.data.progresses[personId] || { stages: {} };
-        const s = p.stages[idx] || { value: 0, status: '未开始', manualStatus: null };
-        const locked = isStageLocked(personId, idx);
-        const currentStatus = getStageStatus(personId, idx, stages, thresholds);
-        const stageClass = locked ? 'locked' : (currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : ''));
-        const indexClass = currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : '');
-
-        html += `
-            <div class="stage-card ${stageClass}">
-                <div class="stage-top">
-                    <div class="stage-name">
-                        <span class="stage-index ${indexClass}">${idx+1}</span>
-                        ${stage.name}
-                        <span class="status-badge ${currentStatus}" style="font-size:11px;padding:2px 10px;">${currentStatus}</span>
-                    </div>
-                </div>
-                <div class="stage-controls">
-        `;
-
-        if (stage.hasNumber) {
-            const val = s.value || 0;
-            const th = thresholds[trackKey] && thresholds[trackKey][idx];
-            const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
-            html += `
-                <div>
-                    <input type="number" min="0" value="${val}" ${locked ? 'disabled' : ''} 
-                        onchange="updateStageValue('${personId}', ${idx}, this.value)">
-                    <span class="stage-threshold">(阈值: ${thresholdVal})</span>
-                    <button class="config-btn" onclick="event.stopPropagation();showThresholdConfig('${personId}', ${idx})">⚙️ 修改阈值</button>
-                </div>
-            `;
-        } else {
-            html += `<span style="color:#999;font-size:13px;">📌 固定完成类阶段</span>`;
-        }
-
-        html += `
-            <div>
-                <select ${locked ? 'disabled' : ''} onchange="updateStageStatus('${personId}', ${idx}, this.value)">
-                    <option value="未开始" ${currentStatus === '未开始' ? 'selected' : ''}>未开始</option>
-                    <option value="进行中" ${currentStatus === '进行中' ? 'selected' : ''}>进行中</option>
-                    <option value="已完成" ${currentStatus === '已完成' ? 'selected' : ''}>已完成</option>
-                </select>
-            </div>
-        `;
-
-        html += `</div></div>`;
-    });
+  for (let idx = 0; idx < stages.length; idx++) {
+    const stage = stages[idx];
+    const p = state.data.progresses[personId] || { stages: {} };
+    const s = p.stages[idx] || { value: 0, status: '未开始', manualStatus: null };
+    const locked = await isStageLocked(personId, idx);
+    const currentStatus = await getStageStatus(personId, idx, stages, thresholds);
+    const stageClass = locked ? 'locked' : (currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : ''));
+    const indexClass = currentStatus === '已完成' ? 'completed' : (currentStatus === '进行中' ? 'active' : '');
 
     html += `
-            </div>
-            <div style="text-align:center;margin-top:24px;padding:20px;">
-                <button class="btn btn-primary" onclick="goHome()" style="background:#667eea;color:white;padding:12px 40px;font-size:16px;">← 返回总览</button>
-            </div>
+      <div class="stage-card ${stageClass}">
+        <div class="stage-top">
+          <div class="stage-name">
+            <span class="stage-index ${indexClass}">${idx+1}</span>
+            ${stage.name}
+            <span class="status-badge ${currentStatus}" style="font-size:11px;padding:2px 10px;">${currentStatus}</span>
+          </div>
         </div>
+        <div class="stage-controls">
     `;
 
-    document.getElementById('app').innerHTML = html;
+    if (stage.hasNumber) {
+      const val = s.value || 0;
+      const th = thresholds[trackKey] && thresholds[trackKey][idx];
+      const thresholdVal = th ? th.threshold : (stage.defaultThreshold || 1);
+      html += `
+        <div>
+          <input type="number" min="0" value="${val}" ${locked ? 'disabled' : ''}
+            onchange="updateStageValue('${personId}', ${idx}, this.value)">
+          <span class="stage-threshold">(阈值: ${thresholdVal})</span>
+          <button class="config-btn" onclick="event.stopPropagation();showThresholdConfig('${personId}', ${idx})">⚙️ 修改阈值</button>
+        </div>
+      `;
+    } else {
+      html += `<span style="color:#999;font-size:13px;">📌 固定完成类阶段</span>`;
+    }
+
+    html += `
+        <div>
+          <select ${locked ? 'disabled' : ''} onchange="updateStageStatus('${personId}', ${idx}, this.value)">
+            <option value="未开始" ${currentStatus === '未开始' ? 'selected' : ''}>未开始</option>
+            <option value="进行中" ${currentStatus === '进行中' ? 'selected' : ''}>进行中</option>
+            <option value="已完成" ${currentStatus === '已完成' ? 'selected' : ''}>已完成</option>
+          </select>
+        </div>
+      </div>
+      <div class="stage-details">
+        <div class="left-col">
+          <div class="col-header">📝 阶段日志 <span class="count" id="log-count-${personId}-${idx}"></span></div>
+          <div id="log-area-${personId}-${idx}"><div class="no-data-tip" id="log-loading-${personId}-${idx}">加载中...</div></div>
+          <button class="add-btn-small" onclick="showAddLogForm('${personId}', ${idx})" style="width:100%;text-align:center;margin-top:4px;">+ 添加日志</button>
+        </div>
+        <div class="right-col">
+          <div class="col-header">💬 评论 <span class="count" id="comment-count-${personId}-${idx}"></span></div>
+          <div id="comment-area-${personId}-${idx}"><div class="no-data-tip" id="comment-loading-${personId}-${idx}">加载中...</div></div>
+          <button class="add-btn-small" onclick="showAddCommentForm('${personId}', ${idx})" style="width:100%;text-align:center;margin-top:4px;">+ 添加评论</button>
+        </div>
+      </div>
+    </div>
+    `;
+  }
+
+  html += `
+      </div>
+      <div style="text-align:center;margin-top:24px;padding:20px;">
+        <button class="btn btn-primary" onclick="goHome()" style="background:#667eea;color:white;padding:12px 40px;font-size:16px;">← 返回总览</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('app').innerHTML = html;
+
+  // Load logs and comments for each stage
+  for (let idx = 0; idx < stages.length; idx++) {
+    renderLogs(personId, idx);
+    renderComments(personId, idx);
+  }
 }
 
 // ==================== ACTIONS ====================
-function updateStartDate(personId, date) {
-    const person = state.data.persons.find(p => p.id === personId);
-    if (person) {
-        person.startDate = date;
-        saveData();
-        renderDetail(personId);
-    }
+async function updateStartDate(personId, date) {
+  const person = state.data.persons.find(p => p.id === personId);
+  if (person) {
+    person.startDate = date;
+    await saveData();
+    renderDetail(personId);
+  }
 }
 
-function updateStageValue(personId, stageIndex, value) {
-    if (!state.data.progresses[personId]) {
-        state.data.progresses[personId] = { stages: {} };
-    }
-    const s = state.data.progresses[personId].stages;
-    if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
-    s[stageIndex].value = parseInt(value) || 0;
-    // Clear manual status when value changes
-    s[stageIndex].manualStatus = null;
-    saveData();
-    renderDetail(personId);
+async function updateStageValue(personId, stageIndex, value) {
+  if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: {} };
+  const s = state.data.progresses[personId].stages;
+  if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
+  s[stageIndex].value = parseInt(value) || 0;
+  s[stageIndex].manualStatus = null;
+  await saveData();
+  renderDetail(personId);
 }
 
-function updateStageStatus(personId, stageIndex, status) {
-    if (!state.data.progresses[personId]) {
-        state.data.progresses[personId] = { stages: {} };
-    }
-    const s = state.data.progresses[personId].stages;
-    if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
-    s[stageIndex].manualStatus = status;
-    s[stageIndex].status = status;
-    saveData();
-    renderDetail(personId);
+async function updateStageStatus(personId, stageIndex, status) {
+  if (!state.data.progresses[personId]) state.data.progresses[personId] = { stages: {} };
+  const s = state.data.progresses[personId].stages;
+  if (!s[stageIndex]) s[stageIndex] = { value: 0, status: '未开始', manualStatus: null };
+  s[stageIndex].manualStatus = status;
+  s[stageIndex].status = status;
+  await saveData();
+  renderDetail(personId);
 }
 
 function showAddPerson() {
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-        <div class="modal">
-            <h3>➕ 新增人员</h3>
-            <div class="form-group">
-                <label>姓名</label>
-                <input type="text" id="newPersonName" placeholder="请输入姓名" maxlength="20">
-            </div>
-            <div class="form-group">
-                <label>赛道</label>
-                <select id="newPersonTrack">
-                    <option value="求职">求职</option>
-                    <option value="找对象">找对象</option>
-                </select>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">取消</button>
-                <button class="btn btn-primary" onclick="confirmAddPerson()">确认添加</button>
-            </div>
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>➕ 新增人员</h3>
+      <div class="form-group">
+        <label>姓名</label>
+        <input type="text" id="newPersonName" placeholder="请输入姓名" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label>赛道</label>
+        <select id="newPersonTrack">
+          <option value="求职">求职</option>
+          <option value="找对象">找对象</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">取消</button>
+        <button class="btn btn-primary" onclick="confirmAddPerson()">确认添加</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('newPersonName').focus(), 100);
+}
+
+async function confirmAddPerson() {
+  const name = document.getElementById('newPersonName').value.trim();
+  const track = document.getElementById('newPersonTrack').value;
+  if (!name) { alert('请输入姓名'); return; }
+  const id = 'p_' + Date.now();
+  state.data.persons.push({ id, name, track, startDate: new Date().toISOString().split('T')[0] });
+  await saveData();
+  document.querySelector('.modal-overlay').remove();
+  renderHome();
+}
+
+async function deletePerson(personId) {
+  if (!confirm('确定要删除该人员及其所有进度、日志、评论数据吗？')) return;
+  state.data.persons = state.data.persons.filter(p => p.id !== personId);
+  delete state.data.progresses[personId];
+  await saveData();
+  // Also delete logs and comments
+  await supabase.from('logs').delete().eq('person_id', personId);
+  await supabase.from('comments').delete().eq('person_id', personId);
+  goHome();
+}
+
+async function resetData() {
+  if (!confirm('确定要重置所有数据吗？（将恢复到初始示例数据）')) return;
+  // Delete all data from supabase
+  await supabase.from('persons').delete().neq('id', '__dummy__');
+  await supabase.from('progresses').delete().neq('person_id', '__dummy__');
+  await supabase.from('logs').delete().neq('id', 0);
+  await supabase.from('comments').delete().neq('id', 0);
+  await supabase.from('thresholds').delete().neq('id', 0);
+  state.data = { persons: [], progresses: {} };
+  // Insert defaults
+  const defaults = [
+    { id: 'xlh', name: '向龙一', track: '求职', start_date: new Date().toISOString().split('T')[0] },
+    { id: 'ztr', name: '赵陶然', track: '求职', start_date: new Date().toISOString().split('T')[0] },
+    { id: 'hq', name: '黄群', track: '找对象', start_date: new Date().toISOString().split('T')[0] },
+  ];
+  await supabase.from('persons').insert(defaults);
+  renderHome();
+}
+
+async function showThresholdConfig(personId, stageIndex) {
+  const person = state.data.persons.find(p => p.id === personId);
+  if (!person) return;
+  const trackKey = person.track === '求职' ? 'job' : 'love';
+  const stages = getStagesForTrack(person.track);
+  const stage = stages[stageIndex];
+  const thresholds = await loadThresholds();
+  const current = (thresholds[trackKey] && thresholds[trackKey][stageIndex])
+    ? thresholds[trackKey][stageIndex].threshold
+    : (stage.defaultThreshold || 1);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>⚙️ 修改阈值</h3>
+      <p style="color:#666;margin-bottom:16px;">阶段：${stage.name}</p>
+      <div class="form-group">
+        <label>量化阈值</label>
+        <input type="number" id="thresholdInput" value="${current}" min="1">
+        <span style="font-size:12px;color:#999;margin-top:4px;display:block;">达到该数值时自动判定为进行中/已完成</span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">取消</button>
+        <button class="btn btn-primary" onclick="confirmThresholdConfig('${personId}', ${stageIndex})">确认修改</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+async function confirmThresholdConfig(personId, stageIndex) {
+  const val = parseInt(document.getElementById('thresholdInput').value);
+  if (!val || val < 1) { alert('请输入有效的阈值（≥1）'); return; }
+  const person = state.data.persons.find(p => p.id === personId);
+  if (!person) return;
+  const trackKey = person.track === '求职' ? 'job' : 'love';
+  const thresholds = await loadThresholds();
+  if (!thresholds[trackKey]) thresholds[trackKey] = {};
+  if (!thresholds[trackKey][stageIndex]) thresholds[trackKey][stageIndex] = {};
+  thresholds[trackKey][stageIndex].threshold = val;
+  await saveThresholds(thresholds);
+  document.querySelector('.modal-overlay').remove();
+  renderDetail(personId);
+}
+
+// ==================== LOG RENDERERS ====================
+async function renderLogs(personId, stageIndex) {
+  const area = document.getElementById(`log-area-${personId}-${stageIndex}`);
+  const countEl = document.getElementById(`log-count-${personId}-${stageIndex}`);
+  if (!area) return;
+  area.innerHTML = '<div class="no-data-tip">加载中...</div>';
+  const logs = await loadLogs(personId, stageIndex);
+  if (countEl) countEl.textContent = `(${logs.length})`;
+  if (logs.length === 0) { area.innerHTML = '<div class="no-data-tip">暂无日志</div>'; return; }
+  area.innerHTML = logs.map(log => {
+    const moodClass = log.mood ? `mood-${log.mood}` : '';
+    return `
+      <div class="log-item" id="log-item-${log.id}">
+        <div class="log-meta">
+          <span class="log-time">${formatTime(log.created_at)}</span>
+          <span class="log-mood ${moodClass}">${log.mood || '一般'}</span>
         </div>
-    `;
-    document.body.appendChild(overlay);
-    setTimeout(() => document.getElementById('newPersonName').focus(), 100);
-}
-
-function confirmAddPerson() {
-    const name = document.getElementById('newPersonName').value.trim();
-    const track = document.getElementById('newPersonTrack').value;
-    if (!name) { alert('请输入姓名'); return; }
-    const id = 'p_' + Date.now();
-    state.data.persons.push({ id, name, track, startDate: new Date().toISOString().split('T')[0] });
-    saveData();
-    document.querySelector('.modal-overlay').remove();
-    renderHome();
-}
-
-function deletePerson(personId) {
-    if (!confirm('确定要删除该人员及其所有进度数据吗？')) return;
-    state.data.persons = state.data.persons.filter(p => p.id !== personId);
-    delete state.data.progresses[personId];
-    saveData();
-    goHome();
-}
-
-function resetData() {
-    if (!confirm('确定要重置所有数据吗？（将恢复到初始示例数据）')) return;
-    localStorage.removeItem(PERSONAL_CONFIG_KEY);
-    localStorage.removeItem(THRESHOLD_CONFIG_KEY);
-    loadData();
-    renderHome();
-}
-
-function showThresholdConfig(personId, stageIndex) {
-    const person = state.data.persons.find(p => p.id === personId);
-    if (!person) return;
-    const trackKey = person.track === '求职' ? 'job' : 'love';
-    const stages = getStagesForTrack(person.track);
-    const stage = stages[stageIndex];
-    const thresholds = loadThresholds();
-    const current = (thresholds[trackKey] && thresholds[trackKey][stageIndex]) 
-        ? thresholds[trackKey][stageIndex].threshold 
-        : (stage.defaultThreshold || 1);
-
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-        <div class="modal">
-            <h3>⚙️ 修改阈值</h3>
-            <p style="color:#666;margin-bottom:16px;">阶段：${stage.name}</p>
-            <div class="form-group">
-                <label>量化阈值</label>
-                <input type="number" id="thresholdInput" value="${current}" min="1">
-                <span style="font-size:12px;color:#999;margin-top:4px;display:block;">达到该数值时自动判定为进行中/已完成</span>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">取消</button>
-                <button class="btn btn-primary" onclick="confirmThresholdConfig('${personId}', ${stageIndex})">确认修改</button>
-            </div>
+        <div class="log-content">${escapeHtml(log.content)}</div>
+        <div class="log-actions">
+          <button class="action-btn" onclick="editLog('${log.id}', '${personId}', ${stageIndex})">✏️</button>
+          <button class="action-btn" onclick="deleteLogConfirm('${log.id}', '${personId}', ${stageIndex})">🗑</button>
         </div>
+      </div>
     `;
-    document.body.appendChild(overlay);
+  }).join('');
 }
 
-function confirmThresholdConfig(personId, stageIndex) {
-    const val = parseInt(document.getElementById('thresholdInput').value);
-    if (!val || val < 1) { alert('请输入有效的阈值（≥1）'); return; }
-    const person = state.data.persons.find(p => p.id === personId);
-    if (!person) return;
-    const trackKey = person.track === '求职' ? 'job' : 'love';
-    const thresholds = loadThresholds();
-    if (!thresholds[trackKey]) thresholds[trackKey] = {};
-    if (!thresholds[trackKey][stageIndex]) thresholds[trackKey][stageIndex] = {};
-    thresholds[trackKey][stageIndex].threshold = val;
-    saveThresholds(thresholds);
-    document.querySelector('.modal-overlay').remove();
-    renderDetail(personId);
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showAddLogForm(personId, stageIndex) {
+  const area = document.getElementById(`log-area-${personId}-${stageIndex}`);
+  const formId = `log-form-${personId}-${stageIndex}`;
+  // Remove existing form if any
+  document.getElementById(formId)?.remove();
+  const form = document.createElement('div');
+  form.id = formId;
+  form.className = 'add-log-form';
+  form.innerHTML = `
+    <textarea id="log-content-${personId}-${stageIndex}" placeholder="记录今天在这个阶段的进展、感受..." rows="3"></textarea>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+      <label style="font-size:12px;color:#999;">心情：</label>
+      <select id="log-mood-${personId}-${stageIndex}" class="small-select">
+        <option value="积极">😊 积极</option>
+        <option value="一般">😐 一般</option>
+        <option value="消极">😞 消极</option>
+        <option value="其他">🤔 其他</option>
+      </select>
+      <button class="save-btn" style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#667eea;color:white;font-size:12px;" onclick="confirmAddLog('${personId}', ${stageIndex})">保存</button>
+      <button style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#f0f0f0;color:#666;font-size:12px;" onclick="cancelAddLog('${personId}', ${stageIndex})">取消</button>
+    </div>
+  `;
+  area.prepend(form);
+  document.getElementById(`log-content-${personId}-${stageIndex}`).focus();
+}
+
+function cancelAddLog(personId, stageIndex) {
+  const form = document.getElementById(`log-form-${personId}-${stageIndex}`);
+  form?.remove();
+}
+
+async function confirmAddLog(personId, stageIndex) {
+  const content = document.getElementById(`log-content-${personId}-${stageIndex}`)?.value.trim();
+  if (!content) { alert('请输入日志内容'); return; }
+  const mood = document.getElementById(`log-mood-${personId}-${stageIndex}`)?.value || '一般';
+  await saveLog(personId, stageIndex, content, mood);
+  cancelAddLog(personId, stageIndex);
+  renderLogs(personId, stageIndex);
+}
+
+function editLog(logId, personId, stageIndex) {
+  const item = document.getElementById(`log-item-${logId}`);
+  if (!item) return;
+  const contentEl = item.querySelector('.log-content');
+  const metaEl = item.querySelector('.log-meta');
+  const originalContent = contentEl.textContent;
+  const originalMood = item.querySelector('.log-mood')?.textContent || '一般';
+  contentEl.innerHTML = `
+    <textarea class="inline-edit-box" id="edit-log-content-${logId}" rows="2">${escapeHtml(originalContent)}</textarea>
+    <div class="inline-edit-row" style="margin-top:6px;">
+      <select id="edit-log-mood-${logId}" class="small-select">
+        <option value="积极" ${originalMood === '积极' ? 'selected' : ''}>😊 积极</option>
+        <option value="一般" ${originalMood === '一般' ? 'selected' : ''}>😐 一般</option>
+        <option value="消极" ${originalMood === '消极' ? 'selected' : ''}>😞 消极</option>
+        <option value="其他" ${originalMood === '其他' ? 'selected' : ''}>🤔 其他</option>
+      </select>
+      <button class="save-btn" onclick="confirmEditLog('${logId}', '${personId}', ${stageIndex})">保存</button>
+      <button class="cancel-btn" onclick="renderLogs('${personId}', ${stageIndex})">取消</button>
+    </div>
+  `;
+  // Hide original actions
+  item.querySelector('.log-actions').style.display = 'none';
+}
+
+async function confirmEditLog(logId, personId, stageIndex) {
+  const content = document.getElementById(`edit-log-content-${logId}`)?.value.trim();
+  if (!content) { alert('内容不能为空'); return; }
+  const mood = document.getElementById(`edit-log-mood-${logId}`)?.value || '一般';
+  await updateLog(logId, content, mood);
+  renderLogs(personId, stageIndex);
+}
+
+async function deleteLogConfirm(logId, personId, stageIndex) {
+  if (!confirm('确定删除这条日志吗？')) return;
+  await deleteLog(logId);
+  renderLogs(personId, stageIndex);
+}
+
+// ==================== COMMENT RENDERERS ====================
+async function renderComments(personId, stageIndex) {
+  const area = document.getElementById(`comment-area-${personId}-${stageIndex}`);
+  const countEl = document.getElementById(`comment-count-${personId}-${stageIndex}`);
+  if (!area) return;
+  area.innerHTML = '<div class="no-data-tip">加载中...</div>';
+  const comments = await loadComments(personId, stageIndex);
+  if (countEl) countEl.textContent = `(${comments.length})`;
+  if (comments.length === 0) { area.innerHTML = '<div class="no-data-tip">暂无评论</div>'; return; }
+
+  // Build tree: top-level comments and their replies
+  const topLevel = comments.filter(c => !c.parent_id);
+  const replies = {};
+  comments.filter(c => c.parent_id).forEach(c => {
+    if (!replies[c.parent_id]) replies[c.parent_id] = [];
+    replies[c.parent_id].push(c);
+  });
+
+  area.innerHTML = topLevel.map(comment => buildCommentHtml(comment, replies, personId, stageIndex)).join('');
+}
+
+function buildCommentHtml(comment, replies, personId, stageIndex) {
+  const avatarColors = ['#667eea','#764ba2','#f093fb','#f5576c','#52c41a','#1890ff','#d48806','#ff4d4f'];
+  const colorIdx = comment.id ? comment.id.toString().length % avatarColors.length : 0;
+  const initial = '我';
+
+  let html = `
+    <div class="comment-item" id="comment-item-${comment.id}">
+      <div class="comment-meta">
+        <span class="comment-avatar" style="background:${avatarColors[colorIdx]}">${initial}</span>
+        <span class="comment-author">我自己</span>
+        <span class="log-time">${formatTime(comment.created_at)}</span>
+        <span class="comment-reaction">💬</span>
+      </div>
+      <div class="comment-text">${escapeHtml(comment.content)}</div>
+      <div class="comment-actions">
+        <button class="action-btn" onclick="editComment('${comment.id}', '${personId}', ${stageIndex})">✏️</button>
+        <button class="action-btn" onclick="deleteCommentConfirm('${comment.id}', '${personId}', ${stageIndex})">🗑</button>
+      </div>
+      <button class="reply-toggle" onclick="showReplyForm('${comment.id}', '${personId}', ${stageIndex})">💬 回复</button>
+      <div id="reply-form-${comment.id}" style="display:none;"></div>
+      <div class="replies" id="replies-${comment.id}">
+  `;
+
+  if (replies[comment.id]) {
+    replies[comment.id].forEach(reply => {
+      html += `
+        <div class="reply-item" id="comment-item-${reply.id}">
+          <div class="comment-meta">
+            <span class="log-time">${formatTime(reply.created_at)}</span>
+            <span class="comment-author">我自己</span>
+          </div>
+          <div class="comment-text">${escapeHtml(reply.content)}</div>
+          <div class="comment-actions">
+            <button class="action-btn" onclick="editComment('${reply.id}', '${personId}', ${stageIndex})">✏️</button>
+            <button class="action-btn" onclick="deleteCommentConfirm('${reply.id}', '${personId}', ${stageIndex})">🗑</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function showAddCommentForm(personId, stageIndex) {
+  const area = document.getElementById(`comment-area-${personId}-${stageIndex}`);
+  const formId = `comment-form-${personId}-${stageIndex}`;
+  document.getElementById(formId)?.remove();
+  const form = document.createElement('div');
+  form.id = formId;
+  form.className = 'add-comment-form';
+  form.innerHTML = `
+    <textarea id="comment-content-${personId}-${stageIndex}" placeholder="写下你的想法、反思或建议..." rows="2"></textarea>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="save-btn" style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#667eea;color:white;font-size:12px;" onclick="confirmAddComment('${personId}', ${stageIndex})">发表</button>
+      <button style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#f0f0f0;color:#666;font-size:12px;" onclick="cancelAddComment('${personId}', ${stageIndex})">取消</button>
+    </div>
+  `;
+  area.prepend(form);
+  document.getElementById(`comment-content-${personId}-${stageIndex}`).focus();
+}
+
+function cancelAddComment(personId, stageIndex) {
+  const form = document.getElementById(`comment-form-${personId}-${stageIndex}`);
+  form?.remove();
+}
+
+async function confirmAddComment(personId, stageIndex) {
+  const content = document.getElementById(`comment-content-${personId}-${stageIndex}`)?.value.trim();
+  if (!content) { alert('请输入评论内容'); return; }
+  await saveComment(personId, stageIndex, content, null);
+  cancelAddComment(personId, stageIndex);
+  renderComments(personId, stageIndex);
+}
+
+function showReplyForm(parentId, personId, stageIndex) {
+  const container = document.getElementById(`reply-form-${parentId}`);
+  if (!container) return;
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div class="reply-form">
+      <textarea id="reply-content-${parentId}" placeholder="写下回复..." rows="2" style="width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#667eea;color:white;font-size:12px;" onclick="confirmReply('${parentId}', '${personId}', ${stageIndex})">回复</button>
+        <button style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#f0f0f0;color:#666;font-size:12px;" onclick="document.getElementById('reply-form-${parentId}').innerHTML='';document.getElementById('reply-form-${parentId}').style.display='none';">取消</button>
+      </div>
+    </div>
+  `;
+  document.getElementById(`reply-content-${parentId}`).focus();
+}
+
+async function confirmReply(parentId, personId, stageIndex) {
+  const content = document.getElementById(`reply-content-${parentId}`)?.value.trim();
+  if (!content) { alert('请输入回复内容'); return; }
+  await saveComment(personId, stageIndex, content, parentId);
+  document.getElementById(`reply-form-${parentId}`).innerHTML = '';
+  document.getElementById(`reply-form-${parentId}`).style.display = 'none';
+  renderComments(personId, stageIndex);
+}
+
+function editComment(commentId, personId, stageIndex) {
+  const item = document.getElementById(`comment-item-${commentId}`);
+  if (!item) return;
+  const textEl = item.querySelector('.comment-text');
+  const originalText = textEl.textContent;
+  textEl.innerHTML = `
+    <textarea class="inline-edit-box" id="edit-comment-${commentId}" rows="2">${escapeHtml(originalText)}</textarea>
+    <div class="inline-edit-row" style="margin-top:6px;">
+      <button class="save-btn" onclick="confirmEditComment('${commentId}', '${personId}', ${stageIndex})">保存</button>
+      <button class="cancel-btn" onclick="renderComments('${personId}', ${stageIndex})">取消</button>
+    </div>
+  `;
+  item.querySelector('.comment-actions').style.display = 'none';
+}
+
+async function confirmEditComment(commentId, personId, stageIndex) {
+  const content = document.getElementById(`edit-comment-${commentId}`)?.value.trim();
+  if (!content) { alert('内容不能为空'); return; }
+  await updateComment(commentId, content);
+  renderComments(personId, stageIndex);
+}
+
+async function deleteCommentConfirm(commentId, personId, stageIndex) {
+  if (!confirm('确定删除这条评论/回复吗？')) return;
+  // Also delete replies
+  await supabase.from('comments').delete().eq('parent_id', commentId);
+  await deleteComment(commentId);
+  renderComments(personId, stageIndex);
 }
 
 // ==================== INIT ====================
-loadData();
 renderHome();
 </script>
 </body>
