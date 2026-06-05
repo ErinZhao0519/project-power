@@ -388,12 +388,13 @@ async function loadComments(personId, stageIndex) {
   return data || [];
 }
 
-async function saveComment(personId, stageIndex, content, parentId) {
+async function saveComment(personId, stageIndex, content, parentId, author) {
   const { data, error } = await supabase.from('comments').insert({
     person_id: personId,
     stage_index: stageIndex,
     content,
-    parent_id: parentId || null
+    parent_id: parentId || null,
+    author_name: author || '匿名'
   }).select();
   if (error) console.error('saveComment error:', error);
   else console.log('saveComment success:', data);
@@ -1114,13 +1115,14 @@ async function renderComments(personId, stageIndex) {
 function buildCommentHtml(comment, replies, personId, stageIndex) {
   const avatarColors = ['#667eea','#764ba2','#f093fb','#f5576c','#52c41a','#1890ff','#d48806','#ff4d4f'];
   const colorIdx = comment.id ? comment.id.toString().length % avatarColors.length : 0;
-  const initial = '我';
+  const author = comment.author_name || '匿名';
+  const initial = author.charAt(0);
 
   let html = `
     <div class="comment-item" id="comment-item-${comment.id}">
       <div class="comment-meta">
-        <span class="comment-avatar" style="background:${avatarColors[colorIdx]}">${initial}</span>
-        <span class="comment-author">我自己</span>
+        <span class="comment-avatar" style="background:${avatarColors[colorIdx]}">${escapeHtml(initial)}</span>
+        <span class="comment-author">${escapeHtml(author)}</span>
         <span class="log-time">${formatTime(comment.created_at)}</span>
         <span class="comment-reaction">💬</span>
       </div>
@@ -1136,11 +1138,12 @@ function buildCommentHtml(comment, replies, personId, stageIndex) {
 
   if (replies[comment.id]) {
     replies[comment.id].forEach(reply => {
+      const replyAuthor = reply.author_name || '匿名';
       html += `
         <div class="reply-item" id="comment-item-${reply.id}">
           <div class="comment-meta">
             <span class="log-time">${formatTime(reply.created_at)}</span>
-            <span class="comment-author">我自己</span>
+            <span class="comment-author">${escapeHtml(replyAuthor)}</span>
           </div>
           <div class="comment-text">${escapeHtml(reply.content)}</div>
           <div class="comment-actions">
@@ -1160,12 +1163,14 @@ function showAddCommentForm(personId, stageIndex) {
   const area = document.getElementById(`comment-area-${personId}-${stageIndex}`);
   const formId = `comment-form-${personId}-${stageIndex}`;
   document.getElementById(formId)?.remove();
+  const savedName = localStorage.getItem('project_power_nickname') || '';
   const form = document.createElement('div');
   form.id = formId;
   form.className = 'add-comment-form';
   form.innerHTML = `
     <textarea id="comment-content-${personId}-${stageIndex}" placeholder="写下你的想法、反思或建议..." rows="2"></textarea>
-    <div style="display:flex;gap:8px;margin-top:6px;">
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;">
+      <input id="comment-author-${personId}-${stageIndex}" type="text" value="${escapeHtml(savedName)}" placeholder="你的昵称" style="flex:1;min-width:80px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;outline:none;">
       <button class="save-btn" style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#667eea;color:white;font-size:12px;" onclick="confirmAddComment('${personId}', ${stageIndex})">发表</button>
       <button style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#f0f0f0;color:#666;font-size:12px;" onclick="cancelAddComment('${personId}', ${stageIndex})">取消</button>
     </div>
@@ -1182,7 +1187,9 @@ function cancelAddComment(personId, stageIndex) {
 async function confirmAddComment(personId, stageIndex) {
   const content = document.getElementById(`comment-content-${personId}-${stageIndex}`)?.value.trim();
   if (!content) { alert('请输入评论内容'); return; }
-  await saveComment(personId, stageIndex, content, null);
+  const author = document.getElementById(`comment-author-${personId}-${stageIndex}`)?.value.trim() || '匿名';
+  localStorage.setItem('project_power_nickname', author);
+  await saveComment(personId, stageIndex, content, null, author);
   cancelAddComment(personId, stageIndex);
   renderComments(personId, stageIndex);
 }
@@ -1191,10 +1198,12 @@ function showReplyForm(parentId, personId, stageIndex) {
   const container = document.getElementById(`reply-form-${parentId}`);
   if (!container) return;
   container.style.display = 'block';
+  const savedName = localStorage.getItem('project_power_nickname') || '';
   container.innerHTML = `
     <div class="reply-form">
       <textarea id="reply-content-${parentId}" placeholder="写下回复..." rows="2" style="width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
-      <div style="display:flex;gap:8px;margin-top:6px;">
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;">
+        <input id="reply-author-${parentId}" type="text" value="${escapeHtml(savedName)}" placeholder="你的昵称" style="flex:1;min-width:80px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;outline:none;">
         <button style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#667eea;color:white;font-size:12px;" onclick="confirmReply('${parentId}', '${personId}', ${stageIndex})">回复</button>
         <button style="padding:4px 14px;border:none;border-radius:6px;cursor:pointer;background:#f0f0f0;color:#666;font-size:12px;" onclick="document.getElementById('reply-form-${parentId}').innerHTML='';document.getElementById('reply-form-${parentId}').style.display='none';">取消</button>
       </div>
@@ -1206,7 +1215,9 @@ function showReplyForm(parentId, personId, stageIndex) {
 async function confirmReply(parentId, personId, stageIndex) {
   const content = document.getElementById(`reply-content-${parentId}`)?.value.trim();
   if (!content) { alert('请输入回复内容'); return; }
-  await saveComment(personId, stageIndex, content, parentId);
+  const author = document.getElementById(`reply-author-${parentId}`)?.value.trim() || '匿名';
+  localStorage.setItem('project_power_nickname', author);
+  await saveComment(personId, stageIndex, content, parentId, author);
   document.getElementById(`reply-form-${parentId}`).innerHTML = '';
   document.getElementById(`reply-form-${parentId}`).style.display = 'none';
   renderComments(personId, stageIndex);
